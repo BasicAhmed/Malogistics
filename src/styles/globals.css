@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cargo-maroon: #3c0008;
+  --signal-amber: #e8a33d;
+  --paper: #f4f1ec;
+}
+
+body {
+  background-color: var(--paper);
+  color: var(--cargo-maroon);
+  font-family: "Inter", Arial, sans-serif;
+}
