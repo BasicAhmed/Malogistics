@@ -1,5 +1,6 @@
 import Nav from "@/components/Nav";
 import Hero from "@/components/Hero";
+import Journey from "@/components/Journey";
 import Services from "@/components/Services";
 import WhyUs from "@/components/WhyUs";
 import Coverage from "@/components/Coverage";
@@ -12,6 +13,7 @@ export default function Home() {
     <main>
       <Nav />
       <Hero />
+      <Journey />
       <Services />
       <WhyUs />
       <Coverage />

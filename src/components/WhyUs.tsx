@@ -1,3 +1,5 @@
+import Reveal from "./Reveal";
+
 const points = [
   {
     title: "Named accountability",
@@ -19,21 +21,23 @@ const points = [
 
 export default function WhyUs() {
   return (
-    <section id="about" className="px-6 md:px-10 py-20 bg-fog/40">
-      <p className="uppercase tracking-widest text-signal-amber text-xs font-mono mb-3">
-        Why MA Logistics
-      </p>
-      <h2 className="font-display font-bold text-3xl md:text-4xl text-cargo-maroon mb-12 max-w-xl">
-        Specific, not abstract.
-      </h2>
+    <section id="about" className="px-6 md:px-10 py-24 bg-fog/40">
+      <Reveal>
+        <p className="uppercase tracking-widest text-signal-amber text-xs font-mono mb-3">
+          Why MA Logistics
+        </p>
+        <h2 className="font-display font-bold text-3xl md:text-4xl text-cargo-maroon mb-12 max-w-xl">
+          Specific, not abstract.
+        </h2>
+      </Reveal>
       <div className="grid md:grid-cols-2 gap-x-12 gap-y-10">
-        {points.map((p) => (
-          <div key={p.title}>
+        {points.map((p, i) => (
+          <Reveal key={p.title} delay={i * 0.08}>
             <h3 className="font-display font-semibold text-lg text-cargo-maroon mb-2">
               {p.title}
             </h3>
             <p className="text-sm text-steel max-w-md">{p.body}</p>
-          </div>
+          </Reveal>
         ))}
       </div>
     </section>

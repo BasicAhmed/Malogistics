@@ -23,6 +23,19 @@ const config: Config = {
       letterSpacing: {
         tightest: "-0.025em",
       },
+      keyframes: {
+        marquee: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
+        "dash-travel": {
+          "0%": { strokeDashoffset: "1000" },
+          "100%": { strokeDashoffset: "0" },
+        },
+      },
+      animation: {
+        marquee: "marquee 30s linear infinite",
+      },
     },
   },
   plugins: [],

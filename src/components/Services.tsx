@@ -1,3 +1,8 @@
+"use client";
+
+import { motion } from "framer-motion";
+import Reveal from "./Reveal";
+
 const services = [
   {
     title: "Road Freight (FTL & LTL)",
@@ -27,21 +32,30 @@ const services = [
 
 export default function Services() {
   return (
-    <section id="services" className="px-6 md:px-10 py-20 bg-paper">
-      <p className="uppercase tracking-widest text-signal-amber text-xs font-mono mb-3">
-        What we move
-      </p>
-      <h2 className="font-display font-bold text-3xl md:text-4xl text-cargo-maroon mb-12 max-w-xl">
-        Container transport, end to end.
-      </h2>
-      <div className="grid md:grid-cols-3 gap-8">
-        {services.map((s) => (
-          <div key={s.title} className="border-t-2 border-cargo-maroon pt-4">
-            <h3 className="font-display font-semibold text-lg text-cargo-maroon mb-2">
-              {s.title}
-            </h3>
-            <p className="text-sm text-steel">{s.desc}</p>
-          </div>
+    <section id="services" className="px-6 md:px-10 py-24 bg-paper">
+      <Reveal>
+        <p className="uppercase tracking-widest text-signal-amber text-xs font-mono mb-3">
+          What we move
+        </p>
+        <h2 className="font-display font-bold text-3xl md:text-4xl text-cargo-maroon mb-12 max-w-xl">
+          Container transport, end to end.
+        </h2>
+      </Reveal>
+      <div className="grid md:grid-cols-3 gap-6">
+        {services.map((s, i) => (
+          <Reveal key={s.title} delay={i * 0.06}>
+            <motion.div
+              whileHover={{ y: -4 }}
+              transition={{ duration: 0.2 }}
+              className="group border-t-2 border-cargo-maroon pt-4 pb-2 h-full relative"
+            >
+              <span className="absolute top-[-2px] left-0 h-[2px] w-0 bg-signal-amber transition-all duration-300 group-hover:w-full" />
+              <h3 className="font-display font-semibold text-lg text-cargo-maroon mb-2">
+                {s.title}
+              </h3>
+              <p className="text-sm text-steel">{s.desc}</p>
+            </motion.div>
+          </Reveal>
         ))}
       </div>
     </section>

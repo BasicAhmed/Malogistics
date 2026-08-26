@@ -1,3 +1,9 @@
+"use client";
+
+import { motion } from "framer-motion";
+import AnimatedCounter from "./AnimatedCounter";
+import RouteLines from "./patterns/RouteLines";
+
 const corridors = [
   { route: "WDH ↔ JNB", distance: "1,720 KM", time: "26H" },
   { route: "GBE ↔ MPM", distance: "1,140 KM", time: "18H" },
@@ -7,9 +13,15 @@ const corridors = [
 
 export default function Hero() {
   return (
-    <section className="bg-cargo-maroon text-paper">
-      <div className="px-6 md:px-10 pt-16 pb-14 grid md:grid-cols-2 gap-10 items-center">
-        <div>
+    <section className="relative bg-cargo-maroon text-paper overflow-hidden">
+      <RouteLines className="absolute inset-0 w-full h-full text-fog opacity-40 pointer-events-none" />
+
+      <div className="relative px-6 md:px-10 pt-16 pb-14 grid md:grid-cols-2 gap-10 items-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        >
           <p className="uppercase tracking-widest text-signal-amber text-xs font-mono mb-4">
             Container transport · Southern Africa
           </p>
@@ -27,37 +39,51 @@ export default function Hero() {
           <div className="flex flex-wrap gap-4">
             <a
               href="#enquiry"
-              className="bg-signal-amber text-cargo-maroon font-semibold px-6 py-3 rounded"
+              className="bg-signal-amber text-cargo-maroon font-semibold px-6 py-3 rounded transition-transform hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20"
             >
               Get a quote →
             </a>
             <a
               href="/track"
-              className="border border-fog px-6 py-3 rounded hover:bg-deck-maroon"
+              className="border border-fog px-6 py-3 rounded hover:bg-deck-maroon transition-colors"
             >
               Track a container
             </a>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-deck-maroon rounded-lg p-6 md:p-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+          className="bg-deck-maroon rounded-lg p-6 md:p-8 relative"
+        >
           <div className="flex items-center gap-2 text-xs font-mono text-fog mb-6">
-            <span className="w-2 h-2 rounded-full bg-status-clear inline-block" />
+            <motion.span
+              className="w-2 h-2 rounded-full bg-status-clear inline-block"
+              animate={{ opacity: [1, 0.3, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
             LIVE · TODAY
           </div>
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <div className="text-3xl md:text-4xl font-display font-bold">87</div>
+              <div className="text-3xl md:text-4xl font-display font-bold">
+                <AnimatedCounter target={87} />
+              </div>
               <div className="text-xs text-fog font-mono mt-1">CONTAINERS IN MOTION</div>
             </div>
             <div>
               <div className="text-3xl md:text-4xl font-display font-bold">
-                99.2<span className="text-signal-amber">%</span>
+                <AnimatedCounter target={99.2} decimals={1} />
+                <span className="text-signal-amber">%</span>
               </div>
               <div className="text-xs text-fog font-mono mt-1">ON-TIME ARRIVAL · 30D</div>
             </div>
             <div>
-              <div className="text-3xl md:text-4xl font-display font-bold">04</div>
+              <div className="text-3xl md:text-4xl font-display font-bold">
+                <AnimatedCounter target={4} />
+              </div>
               <div className="text-xs text-fog font-mono mt-1">ACTIVE CORRIDORS</div>
             </div>
             <div>
@@ -65,10 +91,10 @@ export default function Hero() {
               <div className="text-xs text-fog font-mono mt-1">OPEN INCIDENTS</div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
-      <div className="border-t border-deck-maroon px-6 md:px-10 py-5 flex flex-wrap gap-x-10 gap-y-2 text-xs font-mono text-fog">
+      <div className="relative border-t border-deck-maroon px-6 md:px-10 py-5 flex flex-wrap gap-x-10 gap-y-2 text-xs font-mono text-fog">
         {corridors.map((c) => (
           <div key={c.route}>
             {c.route} · {c.distance} · {c.time}

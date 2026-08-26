@@ -1,3 +1,5 @@
+import ManifestCodes from "./patterns/ManifestCodes";
+
 export default function Footer() {
   return (
     <footer className="bg-cargo-maroon text-fog px-6 md:px-10 py-10">
@@ -15,9 +17,7 @@ export default function Footer() {
           <span>brand@malogistics.co</span>
         </div>
       </div>
-      <p className="text-[10px] font-mono text-fog/60 mt-8">
-        MAEU 471 8829 · TGHU 920 1142 · GESU 305 9001 · HLXU 117 4408
-      </p>
+      <ManifestCodes className="text-fog/50 mt-8" />
     </footer>
   );
 }
