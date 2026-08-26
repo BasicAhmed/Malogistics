@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import TruckRig from "./illustrations/TruckRig";
 
 const stages = [
   {
@@ -70,6 +71,12 @@ export default function Journey() {
             style={{ height: lineHeight }}
             className="absolute top-0 left-0 w-[2px] bg-signal-amber rounded-full"
           />
+          <motion.div
+            style={{ top: lineHeight }}
+            className="absolute left-1/2 -translate-x-1/2 -translate-y-full w-16 text-signal-amber"
+          >
+            <TruckRig className="w-16 h-auto -scale-x-100" />
+          </motion.div>
         </div>
 
         <div className="flex flex-col gap-14 md:gap-20">
