@@ -1,0 +1,80 @@
+const corridors = [
+  { route: "WDH ↔ JNB", distance: "1,720 KM", time: "26H" },
+  { route: "GBE ↔ MPM", distance: "1,140 KM", time: "18H" },
+  { route: "JNB ↔ DUR", distance: "580 KM", time: "8H" },
+  { route: "WDH ↔ CPT", distance: "1,490 KM", time: "22H" },
+];
+
+export default function Hero() {
+  return (
+    <section className="bg-cargo-maroon text-paper">
+      <div className="px-6 md:px-10 pt-16 pb-14 grid md:grid-cols-2 gap-10 items-center">
+        <div>
+          <p className="uppercase tracking-widest text-signal-amber text-xs font-mono mb-4">
+            Container transport · Southern Africa
+          </p>
+          <h1 className="font-display font-extrabold text-4xl md:text-6xl leading-[0.95] tracking-tightest mb-6">
+            Move cargo
+            <br />
+            without
+            <br />
+            the hassle<span className="text-signal-amber">.</span>
+          </h1>
+          <p className="max-w-md text-fog mb-8">
+            118 trucks. Four corridors. Real-time handover tracking from yard
+            to dock — and a dispatcher you can call by name.
+          </p>
+          <div className="flex flex-wrap gap-4">
+            <a
+              href="#enquiry"
+              className="bg-signal-amber text-cargo-maroon font-semibold px-6 py-3 rounded"
+            >
+              Get a quote →
+            </a>
+            <a
+              href="/track"
+              className="border border-fog px-6 py-3 rounded hover:bg-deck-maroon"
+            >
+              Track a container
+            </a>
+          </div>
+        </div>
+
+        <div className="bg-deck-maroon rounded-lg p-6 md:p-8">
+          <div className="flex items-center gap-2 text-xs font-mono text-fog mb-6">
+            <span className="w-2 h-2 rounded-full bg-status-clear inline-block" />
+            LIVE · TODAY
+          </div>
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <div className="text-3xl md:text-4xl font-display font-bold">87</div>
+              <div className="text-xs text-fog font-mono mt-1">CONTAINERS IN MOTION</div>
+            </div>
+            <div>
+              <div className="text-3xl md:text-4xl font-display font-bold">
+                99.2<span className="text-signal-amber">%</span>
+              </div>
+              <div className="text-xs text-fog font-mono mt-1">ON-TIME ARRIVAL · 30D</div>
+            </div>
+            <div>
+              <div className="text-3xl md:text-4xl font-display font-bold">04</div>
+              <div className="text-xs text-fog font-mono mt-1">ACTIVE CORRIDORS</div>
+            </div>
+            <div>
+              <div className="text-3xl md:text-4xl font-display font-bold">00</div>
+              <div className="text-xs text-fog font-mono mt-1">OPEN INCIDENTS</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t border-deck-maroon px-6 md:px-10 py-5 flex flex-wrap gap-x-10 gap-y-2 text-xs font-mono text-fog">
+        {corridors.map((c) => (
+          <div key={c.route}>
+            {c.route} · {c.distance} · {c.time}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
