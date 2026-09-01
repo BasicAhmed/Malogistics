@@ -39,6 +39,9 @@ export default function EnquiryForm() {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<FormData>(initialData);
   const [submitted, setSubmitted] = useState(false);
+  const [trackingNumber, setTrackingNumber] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const update = (field: keyof FormData, value: string) =>
     setData((d) => ({ ...d, [field]: value }));
@@ -48,6 +51,27 @@ export default function EnquiryForm() {
 
   const canSubmit = data.name && data.phone && data.email;
 
+  async function handleSubmit() {
+    if (!canSubmit) return;
+    setSubmitting(true);
+    setError("");
+    try {
+      const res = await fetch("/api/enquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to submit");
+      const json = await res.json();
+      setTrackingNumber(json.trackingNumber);
+      setSubmitted(true);
+    } catch {
+      setError("Something went wrong — please try again or contact us directly.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   if (submitted) {
     return (
       <div className="bg-deck-maroon text-paper rounded-lg p-10 text-center">
@@ -55,9 +79,16 @@ export default function EnquiryForm() {
         <h3 className="font-display font-bold text-2xl mb-3">
           We&apos;ve got your shipment details.
         </h3>
-        <p className="text-fog max-w-md mx-auto">
+        <p className="text-fog max-w-md mx-auto mb-4">
           A dispatcher will contact you at {data.phone || data.email} with a
           route plan and quote — usually within one business day.
+        </p>
+        <div className="inline-block bg-cargo-maroon rounded px-6 py-3">
+          <p className="text-xs font-mono text-fog">YOUR REFERENCE NUMBER</p>
+          <p className="font-mono text-xl text-signal-amber font-semibold">{trackingNumber}</p>
+        </div>
+        <p className="text-xs text-fog mt-4">
+          A full tracking number will be sent to your email once the order is confirmed.
         </p>
       </div>
     );
@@ -204,14 +235,15 @@ export default function EnquiryForm() {
           </button>
         ) : (
           <button
-            onClick={() => canSubmit && setSubmitted(true)}
-            disabled={!canSubmit}
+            onClick={handleSubmit}
+            disabled={!canSubmit || submitting}
             className="bg-signal-amber text-cargo-maroon font-semibold px-6 py-2.5 rounded text-sm disabled:opacity-40"
           >
-            Submit enquiry
+            {submitting ? "Submitting…" : "Submit enquiry"}
           </button>
         )}
       </div>
+      {error && <p className="text-status-hold text-sm mt-4">{error}</p>}
     </div>
   );
 }
