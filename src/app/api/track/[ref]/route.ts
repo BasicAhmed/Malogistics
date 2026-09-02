@@ -3,7 +3,7 @@ import { getOrderByTrackingNumber } from "@/lib/store";
 import { STATUS_LABELS } from "@/lib/types";
 
 export async function GET(_req: NextRequest, { params }: { params: { ref: string } }) {
-  const order = getOrderByTrackingNumber(params.ref);
+  const order = await getOrderByTrackingNumber(params.ref);
 
   if (!order) {
     return NextResponse.json({ found: false }, { status: 404 });

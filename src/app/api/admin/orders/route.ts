@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { listOrders, createOrder } from "@/lib/store";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
-  return NextResponse.json({ orders: listOrders() });
+  const orders = await listOrders();
+  return NextResponse.json({ orders });
 }
 
 export async function POST(req: NextRequest) {
@@ -26,7 +29,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing required contact details" }, { status: 400 });
   }
 
-  const order = createOrder({
+  const order = await createOrder({
     source: "sales_manual",
     goodsType: goodsType || "",
     origin: origin || "",

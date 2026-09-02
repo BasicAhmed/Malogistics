@@ -4,5 +4,5 @@ import { performanceStats } from "@/lib/store";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  return NextResponse.json(performanceStats());
+  return NextResponse.json(await performanceStats());
 }

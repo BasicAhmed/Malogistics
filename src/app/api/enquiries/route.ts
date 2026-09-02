@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing required contact details" }, { status: 400 });
   }
 
-  const order = createOrder({
+  const order = await createOrder({
     source: "web_enquiry",
     goodsType: goodsType || "",
     origin: origin || "",
