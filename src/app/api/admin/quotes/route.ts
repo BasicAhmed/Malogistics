@@ -64,14 +64,16 @@ export async function POST(req: NextRequest) {
   }
 
   let pdfBase64: string | undefined;
+  let pdfError: string | undefined;
   try {
     const pdfBuffer = await generateQuotePdf(updated, breakdown, config);
     pdfBase64 = pdfBuffer.toString("base64");
-  } catch (err) {
+  } catch (err: any) {
     console.error("PDF generation failed", err);
+    pdfError = err?.message || "PDF generation failed";
   }
 
   const emailResult = await sendQuotationEmail(updated, breakdown, pdfBase64);
 
-  return NextResponse.json({ order: updated, breakdown, emailResult });
+  return NextResponse.json({ order: updated, breakdown, emailResult, pdfAttached: !!pdfBase64, pdfError });
 }

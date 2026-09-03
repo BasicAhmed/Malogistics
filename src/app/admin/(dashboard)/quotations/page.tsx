@@ -33,6 +33,7 @@ export default function QuotationsPage() {
   const [crossBorder, setCrossBorder] = useState(false);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [sendResult, setSendResult] = useState<{ pdfAttached: boolean; pdfError?: string; emailSent?: boolean } | null>(null);
   const [serverErrors, setServerErrors] = useState<string[]>([]);
 
   const [pending, setPending] = useState<Order[]>([]);
@@ -122,6 +123,12 @@ export default function QuotationsPage() {
       setServerErrors(json?.errors?.map((e: any) => e.message) ?? [json?.error ?? "Failed to send quote."]);
       return;
     }
+    const json = await res.json();
+    setSendResult({
+      pdfAttached: json.pdfAttached,
+      pdfError: json.pdfError,
+      emailSent: json.emailResult?.sent,
+    });
     setSent(true);
     loadPending();
   }
@@ -294,6 +301,21 @@ export default function QuotationsPage() {
               >
                 {sending ? "Sending…" : sent ? "Sent ✓ — send again?" : "Send quotation email + PDF"}
               </button>
+
+              {sendResult && (
+                <div
+                  className={`rounded-lg p-3 text-xs ${
+                    sendResult.pdfAttached && sendResult.emailSent
+                      ? "bg-status-clear/10 text-status-clear"
+                      : "bg-status-hold/10 text-status-hold"
+                  }`}
+                >
+                  <p>Email {sendResult.emailSent ? "sent ✓" : "NOT sent — check RESEND_API_KEY in Vercel"}</p>
+                  <p>
+                    PDF {sendResult.pdfAttached ? "attached ✓" : `NOT attached — ${sendResult.pdfError || "unknown error"}`}
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
