@@ -43,8 +43,9 @@ const styles = StyleSheet.create({
   footer: { marginTop: 40, fontSize: 8, color: COLORS.steel, borderTop: `1px solid ${COLORS.fog}`, paddingTop: 12 },
 });
 
-function money(n: number): string {
-  return `R ${n.toLocaleString("en-ZA", { maximumFractionDigits: 0 })}`;
+function money(n: number | undefined): string {
+  const v = Number(n) || 0;
+  return `R ${v.toLocaleString("en-ZA", { maximumFractionDigits: 0 })}`;
 }
 
 export async function generateQuotePdf(

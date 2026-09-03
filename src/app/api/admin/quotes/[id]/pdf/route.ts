@@ -16,12 +16,22 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   const config = await getPricingConfig();
   const breakdown = order.quoteBreakdown as any;
 
-  const buffer = await generateQuotePdf(order, breakdown, config);
-
-  return new NextResponse(new Uint8Array(buffer), {
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="MA-Logistics-Quote-${order.trackingNumber}.pdf"`,
-    },
-  });
+  try {
+    const buffer = await generateQuotePdf(order, breakdown, config);
+    return new NextResponse(new Uint8Array(buffer), {
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="MA-Logistics-Quote-${order.trackingNumber}.pdf"`,
+      },
+    });
+  } catch (err) {
+    console.error("PDF generation failed for order", params.id, err);
+    return NextResponse.json(
+      {
+        error:
+          "Couldn't generate a PDF for this quote — it may have been created before the pricing engine update. Send a new quote for this order and try again.",
+      },
+      { status: 500 }
+    );
+  }
 }
