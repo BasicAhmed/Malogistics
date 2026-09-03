@@ -3,9 +3,15 @@ import { listOrders, createOrder } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
-  const orders = await listOrders();
-  return NextResponse.json({ orders });
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const q = searchParams.get("q") || undefined;
+  const status = searchParams.get("status") || undefined;
+  const page = Number(searchParams.get("page") || "1");
+  const pageSize = Number(searchParams.get("pageSize") || "25");
+
+  const result = await listOrders({ q, status, page, pageSize });
+  return NextResponse.json(result);
 }
 
 export async function POST(req: NextRequest) {

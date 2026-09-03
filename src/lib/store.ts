@@ -28,9 +28,43 @@ function rowToOrder(row: any): Order {
   };
 }
 
-export async function listOrders(): Promise<Order[]> {
-  const { rows } = await pool.query("select * from orders order by created_at desc");
-  return rows.map(rowToOrder);
+export async function listOrders(opts?: {
+  q?: string;
+  status?: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<{ orders: Order[]; total: number }> {
+  const page = opts?.page ?? 1;
+  const pageSize = opts?.pageSize ?? 25;
+  const offset = (page - 1) * pageSize;
+
+  const conditions: string[] = [];
+  const values: any[] = [];
+
+  if (opts?.status) {
+    values.push(opts.status);
+    conditions.push(`status = $${values.length}`);
+  }
+  if (opts?.q) {
+    values.push(`%${opts.q.toLowerCase()}%`);
+    const idx = values.length;
+    conditions.push(
+      `(lower(name) like $${idx} or lower(email) like $${idx} or lower(phone) like $${idx} or lower(tracking_number) like $${idx} or lower(company) like $${idx})`
+    );
+  }
+
+  const where = conditions.length ? `where ${conditions.join(" and ")}` : "";
+
+  const countRes = await pool.query(`select count(*) from orders ${where}`, values);
+  const total = Number(countRes.rows[0].count);
+
+  values.push(pageSize, offset);
+  const { rows } = await pool.query(
+    `select * from orders ${where} order by created_at desc limit $${values.length - 1} offset $${values.length}`,
+    values
+  );
+
+  return { orders: rows.map(rowToOrder), total };
 }
 
 export async function getOrderByTrackingNumber(trackingNumber: string): Promise<Order | undefined> {
@@ -127,7 +161,8 @@ export async function updateOrderStatus(
 }
 
 export async function performanceStats() {
-  const orders = await listOrders();
+  const { rows } = await pool.query("select * from orders");
+  const orders = rows.map(rowToOrder);
   const total = orders.length;
   const byStatus = orders.reduce((acc, o) => {
     acc[o.status] = (acc[o.status] ?? 0) + 1;
@@ -147,4 +182,41 @@ export async function performanceStats() {
   const quotedValue = orders.reduce((sum, o) => sum + (o.quoteAmount ?? 0), 0);
 
   return { total, byStatus, delivered: delivered.length, onTimeRate, corridorCounts, quotedValue };
+}
+
+export async function financialStats() {
+  const { rows } = await pool.query("select * from orders");
+  const orders = rows.map(rowToOrder);
+
+  const withQuote = orders.filter((o) => o.quoteAmount != null && o.quoteAmount > 0);
+  const totalQuoted = withQuote.reduce((sum, o) => sum + (o.quoteAmount ?? 0), 0);
+
+  const confirmedStatuses = new Set(["confirmed", "in_transit", "delivered"]);
+  const confirmedOrders = withQuote.filter((o) => confirmedStatuses.has(o.status));
+  const confirmedRevenue = confirmedOrders.reduce((sum, o) => sum + (o.quoteAmount ?? 0), 0);
+
+  const pipelineOrders = withQuote.filter((o) => !confirmedStatuses.has(o.status) && o.status !== "cancelled");
+  const pipelineValue = pipelineOrders.reduce((sum, o) => sum + (o.quoteAmount ?? 0), 0);
+
+  const averageQuote = withQuote.length ? totalQuoted / withQuote.length : 0;
+
+  const byCorridor = withQuote.reduce((acc, o) => {
+    const key = o.corridor || `${o.origin} → ${o.destination}` || "Unspecified";
+    acc[key] = (acc[key] ?? 0) + (o.quoteAmount ?? 0);
+    return acc;
+  }, {} as Record<string, number>);
+
+  const recentQuotes = withQuote
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, 15);
+
+  return {
+    totalQuoted,
+    confirmedRevenue,
+    pipelineValue,
+    averageQuote,
+    quotedCount: withQuote.length,
+    byCorridor,
+    recentQuotes,
+  };
 }
