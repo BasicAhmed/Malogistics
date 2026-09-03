@@ -54,7 +54,13 @@ function moneyRow(label: string, amount: number, opts?: { bold?: boolean; muted?
   </tr>`;
 }
 
-async function dispatch(to: string, subject: string, html: string, text: string) {
+async function dispatch(
+  to: string,
+  subject: string,
+  html: string,
+  text: string,
+  attachments?: { filename: string; content: string }[]
+) {
   if (!process.env.RESEND_API_KEY) {
     console.log("[email:not-configured] Would send to", to, "\n", subject);
     return { sent: false, reason: "RESEND_API_KEY not set" };
@@ -62,7 +68,7 @@ async function dispatch(to: string, subject: string, html: string, text: string)
   try {
     const { Resend } = await import("resend");
     const resend = new Resend(process.env.RESEND_API_KEY);
-    await resend.emails.send({ from: FROM, to, subject, html, text });
+    await resend.emails.send({ from: FROM, to, subject, html, text, attachments });
     return { sent: true };
   } catch (err) {
     console.error("Failed to send email", err);
@@ -89,28 +95,30 @@ export async function sendTrackingEmail(order: Order) {
   return dispatch(order.email, subject, wrapEmail(body, `Tracking number ${order.trackingNumber}`), text);
 }
 
-export async function sendQuotationEmail(order: Order, breakdown: QuoteBreakdown) {
+export async function sendQuotationEmail(order: Order, breakdown: QuoteBreakdown, pdfBase64?: string) {
   const subject = `Your MA Logistics quote — ${order.origin} → ${order.destination}`;
 
   const lines: string[] = [];
-  lines.push(moneyRow("Base freight", breakdown.baseFreight));
-  if (breakdown.urgencySurcharge > 0)
-    lines.push(moneyRow(`Urgency (${breakdown.urgencyPct}%)`, breakdown.urgencySurcharge));
+  lines.push(moneyRow("Base price", breakdown.basePrice));
+  lines.push(moneyRow("Weight charge", breakdown.weightCost));
+  if (breakdown.distanceCost > 0) lines.push(moneyRow("Distance charge", breakdown.distanceCost));
+  lines.push(moneyRow("Volume charge", breakdown.volumeCost));
   if (breakdown.coldChainFee > 0) lines.push(moneyRow("Cold-chain handling", breakdown.coldChainFee));
   if (breakdown.containerHandlingFee > 0)
     lines.push(moneyRow("Container handling", breakdown.containerHandlingFee));
-  if (breakdown.crossBorderClearanceFee > 0)
-    lines.push(moneyRow("Cross-border clearance", breakdown.crossBorderClearanceFee));
-  lines.push(moneyRow("Subtotal", breakdown.subtotal, { muted: true }));
+  if (breakdown.crossBorderFee > 0)
+    lines.push(moneyRow("Cross-border clearance", breakdown.crossBorderFee));
+  if (breakdown.urgencySurcharge > 0)
+    lines.push(moneyRow(`Urgency (${breakdown.urgencyPct}%)`, breakdown.urgencySurcharge));
   lines.push(
-    moneyRow(breakdown.vat > 0 ? "VAT (15%)" : "VAT (zero-rated, cross-border)", breakdown.vat, {
+    moneyRow(breakdown.taxPct > 0 ? `VAT (${breakdown.taxPct}%)` : "VAT (zero-rated, cross-border)", breakdown.tax, {
       muted: true,
     })
   );
 
   const body = `
     <p style="font-size:15px;">Hi ${order.name},</p>
-    <p style="font-size:15px;line-height:1.6;">Here's your quote for ${order.origin} → ${order.destination}. Reply to this email and we'll get it moving — or let us know if anything about the shipment changes and we'll adjust it.</p>
+    <p style="font-size:15px;line-height:1.6;">Here's your quote for ${order.origin} → ${order.destination}. Full breakdown below, and a PDF copy is attached for your records. Reply to this email and we'll get it moving — or let us know if anything about the shipment changes and we'll adjust it.</p>
     <table role="presentation" width="100%" style="margin:20px 0;border-top:1px solid ${BRAND.fog};padding-top:8px;">
       ${lines.join("")}
       <tr><td colspan="2" style="border-top:2px solid ${BRAND.maroon};padding-top:10px;"></td></tr>
@@ -125,7 +133,17 @@ export async function sendQuotationEmail(order: Order, breakdown: QuoteBreakdown
     "en-ZA"
   )}\n\nReference: ${order.trackingNumber}\n\nReply to confirm.\n\n— MA Logistics`;
 
-  return dispatch(order.email, subject, wrapEmail(body, `Your quote: R ${Math.round(breakdown.total).toLocaleString()}`), text);
+  const attachments = pdfBase64
+    ? [{ filename: `MA-Logistics-Quote-${order.trackingNumber}.pdf`, content: pdfBase64 }]
+    : undefined;
+
+  return dispatch(
+    order.email,
+    subject,
+    wrapEmail(body, `Your quote: R ${Math.round(breakdown.total).toLocaleString()}`),
+    text,
+    attachments
+  );
 }
 
 const FOLLOW_UP_COPY = [

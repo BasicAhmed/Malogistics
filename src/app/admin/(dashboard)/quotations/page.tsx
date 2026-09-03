@@ -4,11 +4,14 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { Order } from "@/lib/types";
 import {
   calculateQuote,
+  validateQuoteInput,
   CATEGORY_LABELS,
   URGENCY_LABELS,
   GoodsCategory,
   QuoteUrgency,
   DeliveryScope,
+  PricingConfig,
+  DEFAULT_PRICING_CONFIG,
 } from "@/lib/pricing";
 import { lookupDistance } from "@/lib/distances";
 import { formatCurrency, formatDateTime } from "@/lib/format";
@@ -18,6 +21,7 @@ export default function QuotationsPage() {
   const [candidates, setCandidates] = useState<Order[]>([]);
   const [selected, setSelected] = useState<Order | null>(null);
 
+  const [config, setConfig] = useState<PricingConfig>(DEFAULT_PRICING_CONFIG);
   const [category, setCategory] = useState<GoodsCategory>("general");
   const [weightKg, setWeightKg] = useState("500");
   const [volumeM3, setVolumeM3] = useState("2");
@@ -29,8 +33,15 @@ export default function QuotationsPage() {
   const [crossBorder, setCrossBorder] = useState(false);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [serverErrors, setServerErrors] = useState<string[]>([]);
 
   const [pending, setPending] = useState<Order[]>([]);
+
+  useEffect(() => {
+    fetch("/api/admin/pricing-config")
+      .then((r) => r.json())
+      .then(setConfig);
+  }, []);
 
   const loadPending = useCallback(async () => {
     const res = await fetch("/api/admin/orders?status=quoted&pageSize=50");
@@ -71,55 +82,58 @@ export default function QuotationsPage() {
     setSearch("");
     setCandidates([]);
     setSent(false);
+    setServerErrors([]);
   }
 
   const looked = useMemo(() => lookupDistance(origin, destination), [origin, destination]);
-
   const effectiveDistance = distanceKm ? Number(distanceKm) : looked ?? 0;
 
-  const breakdown = useMemo(
-    () =>
-      calculateQuote({
-        category,
-        weightKg: Number(weightKg) || 0,
-        volumeM3: Number(volumeM3) || 0,
-        distanceKm: effectiveDistance,
-        scope,
-        urgency,
-        crossBorder,
-      }),
+  const inputs = useMemo(
+    () => ({
+      category,
+      weightKg: Number(weightKg) || 0,
+      volumeM3: Number(volumeM3) || 0,
+      distanceKm: effectiveDistance,
+      scope,
+      urgency,
+      crossBorder,
+    }),
     [category, weightKg, volumeM3, effectiveDistance, scope, urgency, crossBorder]
   );
 
+  const clientErrors = useMemo(() => validateQuoteInput(inputs), [inputs]);
+  const sameCity =
+    scope === "regional" && origin.trim() && destination.trim() && origin.trim().toLowerCase() === destination.trim().toLowerCase();
+
+  const breakdown = useMemo(() => calculateQuote(inputs, config), [inputs, config]);
+
   async function sendQuote() {
-    if (!selected) return;
+    if (!selected || clientErrors.length > 0 || sameCity) return;
     setSending(true);
-    await fetch("/api/admin/quotes", {
+    setServerErrors([]);
+    const res = await fetch("/api/admin/quotes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        orderId: selected.id,
-        category,
-        weightKg: Number(weightKg) || 0,
-        volumeM3: Number(volumeM3) || 0,
-        distanceKm: effectiveDistance,
-        scope,
-        urgency,
-        crossBorder,
-        corridor: origin && destination ? `${origin} → ${destination}` : undefined,
-      }),
+      body: JSON.stringify({ orderId: selected.id, origin, destination, ...inputs }),
     });
     setSending(false);
+    if (!res.ok) {
+      const json = await res.json().catch(() => null);
+      setServerErrors(json?.errors?.map((e: any) => e.message) ?? [json?.error ?? "Failed to send quote."]);
+      return;
+    }
     setSent(true);
     loadPending();
   }
+
+  const canSend = !!selected && clientErrors.length === 0 && !sameCity;
 
   return (
     <div>
       <h1 className="font-display font-bold text-2xl md:text-3xl mb-2">Quotations</h1>
       <p className="text-sm text-steel mb-8">
-        Pick an order, set the shipment details, and send a branded quote. Follow-ups go out
-        automatically if there's no reply.
+        Pick an order, set the shipment details, and send a branded quote with PDF attached.
+        Follow-ups go out automatically if there's no reply.
       </p>
 
       <div className="grid lg:grid-cols-2 gap-8">
@@ -257,12 +271,28 @@ export default function QuotationsPage() {
                 </div>
               </div>
 
+              {(clientErrors.length > 0 || sameCity || serverErrors.length > 0) && (
+                <div className="bg-status-hold/10 border border-status-hold rounded-lg p-3 space-y-1">
+                  {clientErrors.map((e, i) => (
+                    <p key={`c${i}`} className="text-xs text-status-hold">{e.message}</p>
+                  ))}
+                  {sameCity && (
+                    <p className="text-xs text-status-hold">
+                      Origin and destination are the same — use &quot;Local / in-city&quot; scope instead.
+                    </p>
+                  )}
+                  {serverErrors.map((e, i) => (
+                    <p key={`s${i}`} className="text-xs text-status-hold">{e}</p>
+                  ))}
+                </div>
+              )}
+
               <button
                 onClick={sendQuote}
-                disabled={sending || (scope === "regional" && !effectiveDistance)}
+                disabled={sending || !canSend}
                 className="w-full bg-signal-amber text-cargo-maroon font-semibold px-6 py-3 rounded text-sm disabled:opacity-40"
               >
-                {sending ? "Sending…" : sent ? "Sent ✓ — send again?" : "Send quotation email"}
+                {sending ? "Sending…" : sent ? "Sent ✓ — send again?" : "Send quotation email + PDF"}
               </button>
             </div>
           )}
@@ -271,30 +301,32 @@ export default function QuotationsPage() {
         <div>
           <div className="bg-cargo-maroon text-paper rounded-lg p-6 sticky top-4">
             <p className="text-xs font-mono text-signal-amber mb-4">LIVE BREAKDOWN</p>
-            <BreakdownRow label="Base freight" value={breakdown.baseFreight} />
-            {breakdown.urgencySurcharge > 0 && (
-              <BreakdownRow label={`Urgency (${breakdown.urgencyPct}%)`} value={breakdown.urgencySurcharge} />
-            )}
+            <BreakdownRow label="Base price" value={breakdown.basePrice} />
+            <BreakdownRow label="Weight charge" value={breakdown.weightCost} />
+            {breakdown.distanceCost > 0 && <BreakdownRow label="Distance charge" value={breakdown.distanceCost} />}
+            <BreakdownRow label="Volume charge" value={breakdown.volumeCost} />
             {breakdown.coldChainFee > 0 && <BreakdownRow label="Cold-chain handling" value={breakdown.coldChainFee} />}
             {breakdown.containerHandlingFee > 0 && (
               <BreakdownRow label="Container handling" value={breakdown.containerHandlingFee} />
             )}
-            {breakdown.crossBorderClearanceFee > 0 && (
-              <BreakdownRow label="Cross-border clearance" value={breakdown.crossBorderClearanceFee} />
+            {breakdown.crossBorderFee > 0 && (
+              <BreakdownRow label="Cross-border clearance" value={breakdown.crossBorderFee} />
+            )}
+            {breakdown.urgencySurcharge > 0 && (
+              <BreakdownRow label={`Urgency (${breakdown.urgencyPct}%)`} value={breakdown.urgencySurcharge} />
             )}
             <div className="border-t border-deck-maroon my-3" />
-            <BreakdownRow label="Subtotal" value={breakdown.subtotal} muted />
             <BreakdownRow
-              label={breakdown.vat > 0 ? "VAT (15%)" : "VAT (zero-rated)"}
-              value={breakdown.vat}
+              label={breakdown.taxPct > 0 ? `VAT (${breakdown.taxPct}%)` : "VAT (zero-rated)"}
+              value={breakdown.tax}
               muted
             />
             <div className="border-t-2 border-signal-amber my-3" />
             <BreakdownRow label="Total" value={breakdown.total} bold />
 
             <p className="text-xs font-mono text-fog mt-5">
-              Chargeable weight: {breakdown.chargeableWeightKg.toFixed(0)}kg
-              {breakdown.minimumApplied ? " · minimum charge applied" : ""}
+              {breakdown.minimumApplied ? "Minimum charge applied · " : ""}
+              Category multiplier: {breakdown.categoryMultiplier}×
             </p>
           </div>
         </div>
@@ -313,8 +345,9 @@ export default function QuotationsPage() {
                   <th className="py-2.5 px-4">Customer</th>
                   <th className="py-2.5 px-4">Quote</th>
                   <th className="py-2.5 px-4">Sent</th>
-                  <th className="py-2.5 px-4">Follow-up stage</th>
+                  <th className="py-2.5 px-4">Follow-up</th>
                   <th className="py-2.5 px-4">Next follow-up</th>
+                  <th className="py-2.5 px-4">PDF</th>
                 </tr>
               </thead>
               <tbody>
@@ -333,6 +366,15 @@ export default function QuotationsPage() {
                     </td>
                     <td className="py-3 px-4 text-xs font-mono text-steel whitespace-nowrap">
                       {o.nextFollowUpAt ? formatDateTime(o.nextFollowUpAt) : "—"}
+                    </td>
+                    <td className="py-3 px-4">
+                      <a
+                        href={`/api/admin/quotes/${o.id}/pdf`}
+                        className="text-signal-amber underline text-xs"
+                        target="_blank"
+                      >
+                        Download
+                      </a>
                     </td>
                   </tr>
                 ))}

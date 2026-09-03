@@ -8,6 +8,7 @@ const tabs = [
   { href: "/admin/orders", label: "Orders" },
   { href: "/admin/financial", label: "Financial" },
   { href: "/admin/quotations", label: "Quotations" },
+  { href: "/admin/pricing", label: "Pricing" },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

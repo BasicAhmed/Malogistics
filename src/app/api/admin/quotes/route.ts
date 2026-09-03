@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getOrderById, saveQuote } from "@/lib/store";
+import { getOrderById, saveQuote, getPricingConfig } from "@/lib/store";
 import { sendQuotationEmail } from "@/lib/email";
-import { calculateQuote, QuoteInput } from "@/lib/pricing";
+import { calculateQuote, validateQuoteInput, QuoteInput } from "@/lib/pricing";
+import { generateQuotePdf } from "@/lib/pdf";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { orderId, category, weightKg, volumeM3, distanceKm, scope, urgency, crossBorder, corridor } =
-    body as QuoteInput & { orderId: string; corridor?: string };
+  const { orderId, category, weightKg, volumeM3, distanceKm, scope, urgency, crossBorder, corridor, origin, destination } =
+    body as QuoteInput & { orderId: string; corridor?: string; origin?: string; destination?: string };
 
   const order = await getOrderById(orderId);
   if (!order) {
@@ -25,11 +26,34 @@ export async function POST(req: NextRequest) {
     crossBorder: !!crossBorder,
   };
 
-  const breakdown = calculateQuote(inputs);
+  // Backend independently validates and calculates — the client never
+  // sends a price, only raw shipment facts, so nothing here can be
+  // manipulated from the frontend.
+  const errors = validateQuoteInput(inputs);
+  if (
+    inputs.scope === "regional" &&
+    origin &&
+    destination &&
+    origin.trim().toLowerCase() === destination.trim().toLowerCase()
+  ) {
+    errors.push({
+      field: "destination",
+      message: "Origin and destination are the same — use \"Local / in-city\" scope instead.",
+    });
+  }
+  if (errors.length > 0) {
+    return NextResponse.json({ error: "Validation failed", errors }, { status: 400 });
+  }
+
+  const config = await getPricingConfig();
+  const breakdown = calculateQuote(inputs, config);
+
+  const finalOrigin = origin || order.origin;
+  const finalDestination = destination || order.destination;
 
   const updated = await saveQuote(orderId, {
     quoteAmount: breakdown.total,
-    corridor,
+    corridor: corridor || `${finalOrigin} → ${finalDestination}`,
     breakdown,
     inputs,
     followUpDays: 2,
@@ -39,7 +63,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to save quote" }, { status: 500 });
   }
 
-  const emailResult = await sendQuotationEmail(updated, breakdown);
+  let pdfBase64: string | undefined;
+  try {
+    const pdfBuffer = await generateQuotePdf(updated, breakdown, config);
+    pdfBase64 = pdfBuffer.toString("base64");
+  } catch (err) {
+    console.error("PDF generation failed", err);
+  }
+
+  const emailResult = await sendQuotationEmail(updated, breakdown, pdfBase64);
 
   return NextResponse.json({ order: updated, breakdown, emailResult });
 }

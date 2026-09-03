@@ -1,6 +1,7 @@
 import { pool } from "./db";
 import { Order, OrderStatus, StatusEvent } from "./types";
 import { generateTrackingNumber } from "./tracking";
+import { PricingConfig, DEFAULT_PRICING_CONFIG } from "./pricing";
 
 // Postgres-backed store (Supabase). Table defined in supabase/schema.sql.
 
@@ -234,6 +235,63 @@ export async function advanceFollowUp(id: string, nextDelayDays: number | null):
       [next.toISOString(), id]
     );
   }
+}
+
+export async function getPricingConfig(): Promise<PricingConfig> {
+  const { rows } = await pool.query("select * from pricing_config where id = 1");
+  if (!rows[0]) return DEFAULT_PRICING_CONFIG;
+  const r = rows[0];
+  return {
+    basePrice: Number(r.base_price),
+    localBasePrice: Number(r.local_base_price),
+    pricePerKg: Number(r.price_per_kg),
+    pricePerKm: Number(r.price_per_km),
+    pricePerVolume: Number(r.price_per_volume),
+    categoryMultiplierGeneral: Number(r.category_multiplier_general),
+    categoryMultiplierContainerized: Number(r.category_multiplier_containerized),
+    categoryMultiplierColdChain: Number(r.category_multiplier_cold_chain),
+    coldChainFee: Number(r.cold_chain_fee),
+    containerHandlingFee: Number(r.container_handling_fee),
+    crossBorderFee: Number(r.cross_border_fee),
+    urgencyFlexiblePct: Number(r.urgency_flexible_pct),
+    urgencyThisMonthPct: Number(r.urgency_this_month_pct),
+    urgencyTwoWeeksPct: Number(r.urgency_two_weeks_pct),
+    urgencyThisWeekPct: Number(r.urgency_this_week_pct),
+    taxPct: Number(r.tax_pct),
+    minimumCharge: Number(r.minimum_charge),
+  };
+}
+
+export async function updatePricingConfig(config: PricingConfig): Promise<PricingConfig> {
+  await pool.query(
+    `update pricing_config set
+      base_price = $1, local_base_price = $2, price_per_kg = $3, price_per_km = $4, price_per_volume = $5,
+      category_multiplier_general = $6, category_multiplier_containerized = $7, category_multiplier_cold_chain = $8,
+      cold_chain_fee = $9, container_handling_fee = $10, cross_border_fee = $11,
+      urgency_flexible_pct = $12, urgency_this_month_pct = $13, urgency_two_weeks_pct = $14, urgency_this_week_pct = $15,
+      tax_pct = $16, minimum_charge = $17, updated_at = now()
+     where id = 1`,
+    [
+      config.basePrice,
+      config.localBasePrice,
+      config.pricePerKg,
+      config.pricePerKm,
+      config.pricePerVolume,
+      config.categoryMultiplierGeneral,
+      config.categoryMultiplierContainerized,
+      config.categoryMultiplierColdChain,
+      config.coldChainFee,
+      config.containerHandlingFee,
+      config.crossBorderFee,
+      config.urgencyFlexiblePct,
+      config.urgencyThisMonthPct,
+      config.urgencyTwoWeeksPct,
+      config.urgencyThisWeekPct,
+      config.taxPct,
+      config.minimumCharge,
+    ]
+  );
+  return getPricingConfig();
 }
 
 export async function performanceStats() {
