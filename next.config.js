@@ -7,8 +7,7 @@ const nextConfig = {
   // without this, PDF generation fails in production while working locally.
   experimental: {
     outputFileTracingIncludes: {
-      "/api/admin/quotes/route": ["./node_modules/pdfkit/js/data/**"],
-      "/api/admin/quotes/[id]/pdf/route": ["./node_modules/pdfkit/js/data/**"],
+      "/**": ["./node_modules/pdfkit/js/**", "./node_modules/pdfkit/**/*.afm"],
     },
   },
 };
