@@ -5,7 +5,7 @@ declare global {
   var _pgPool: Pool | undefined;
 }
 
-function createPool() {
+function createPool(): Pool {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
     throw new Error("DATABASE_URL is not set");
@@ -17,8 +17,16 @@ function createPool() {
   });
 }
 
-// Reuse the pool across hot reloads / serverless invocations.
-export const pool = global._pgPool ?? createPool();
-if (process.env.NODE_ENV !== "production") {
-  global._pgPool = pool;
+// Lazily created so builds/pages that don't touch the DB never fail just
+// because DATABASE_URL isn't present at build time — the pool is only
+// constructed the first time a query actually runs.
+function getPool(): Pool {
+  if (!global._pgPool) {
+    global._pgPool = createPool();
+  }
+  return global._pgPool;
 }
+
+export const pool = {
+  query: (text: string, params?: any[]) => getPool().query(text, params),
+};

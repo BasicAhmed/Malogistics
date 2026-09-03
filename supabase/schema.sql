@@ -23,6 +23,12 @@ create table if not exists orders (
   corridor text,
   on_time boolean,
 
+  quote_breakdown jsonb,
+  quote_inputs jsonb,
+  quote_sent_at timestamptz,
+  follow_up_stage int not null default 0,
+  next_follow_up_at timestamptz,
+
   history jsonb not null default '[]'::jsonb,
 
   created_at timestamptz not null default now(),

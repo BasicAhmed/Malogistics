@@ -36,6 +36,13 @@ export interface Order {
   corridor?: string; // e.g. "JNB-DUR"
   onTime?: boolean; // set on delivery for performance reporting
 
+  // quotation engine fields
+  quoteBreakdown?: Record<string, any>;
+  quoteInputs?: Record<string, any>;
+  quoteSentAt?: string;
+  followUpStage?: number; // 0 = none sent, 1 = first nudge sent, 2 = final nudge sent
+  nextFollowUpAt?: string;
+
   createdAt: string;
   updatedAt: string;
   history: StatusEvent[];

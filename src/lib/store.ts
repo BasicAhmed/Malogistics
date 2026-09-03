@@ -22,6 +22,11 @@ function rowToOrder(row: any): Order {
     quoteAmount: row.quote_amount !== null ? Number(row.quote_amount) : undefined,
     corridor: row.corridor ?? undefined,
     onTime: row.on_time ?? undefined,
+    quoteBreakdown: row.quote_breakdown ?? undefined,
+    quoteInputs: row.quote_inputs ?? undefined,
+    quoteSentAt: row.quote_sent_at ? new Date(row.quote_sent_at).toISOString() : undefined,
+    followUpStage: row.follow_up_stage ?? 0,
+    nextFollowUpAt: row.next_follow_up_at ? new Date(row.next_follow_up_at).toISOString() : undefined,
     createdAt: row.created_at.toISOString?.() ?? row.created_at,
     updatedAt: row.updated_at.toISOString?.() ?? row.updated_at,
     history: row.history as StatusEvent[],
@@ -158,6 +163,77 @@ export async function updateOrderStatus(
   );
 
   return rows[0] ? rowToOrder(rows[0]) : undefined;
+}
+
+export async function saveQuote(
+  id: string,
+  params: {
+    quoteAmount: number;
+    corridor?: string;
+    breakdown: Record<string, any>;
+    inputs: Record<string, any>;
+    followUpDays?: number;
+  }
+): Promise<Order | undefined> {
+  const existing = await getOrderById(id);
+  if (!existing) return undefined;
+
+  const now = new Date();
+  const nextFollowUp = new Date(now.getTime() + (params.followUpDays ?? 2) * 86400000);
+  const history = [...existing.history, { status: "quoted" as const, at: now.toISOString() }];
+
+  const { rows } = await pool.query(
+    `update orders set
+      status = 'quoted',
+      quote_amount = $1,
+      corridor = coalesce($2, corridor),
+      quote_breakdown = $3,
+      quote_inputs = $4,
+      quote_sent_at = now(),
+      follow_up_stage = 0,
+      next_follow_up_at = $5,
+      history = $6,
+      updated_at = now()
+     where id = $7
+     returning *`,
+    [
+      params.quoteAmount,
+      params.corridor ?? null,
+      JSON.stringify(params.breakdown),
+      JSON.stringify(params.inputs),
+      nextFollowUp.toISOString(),
+      JSON.stringify(history),
+      id,
+    ]
+  );
+
+  return rows[0] ? rowToOrder(rows[0]) : undefined;
+}
+
+export async function getOrdersDueForFollowUp(): Promise<Order[]> {
+  const { rows } = await pool.query(
+    `select * from orders
+     where status = 'quoted'
+       and follow_up_stage < 2
+       and next_follow_up_at is not null
+       and next_follow_up_at <= now()`
+  );
+  return rows.map(rowToOrder);
+}
+
+export async function advanceFollowUp(id: string, nextDelayDays: number | null): Promise<void> {
+  if (nextDelayDays === null) {
+    await pool.query(
+      `update orders set follow_up_stage = follow_up_stage + 1, next_follow_up_at = null, updated_at = now() where id = $1`,
+      [id]
+    );
+  } else {
+    const next = new Date(Date.now() + nextDelayDays * 86400000);
+    await pool.query(
+      `update orders set follow_up_stage = follow_up_stage + 1, next_follow_up_at = $1, updated_at = now() where id = $2`,
+      [next.toISOString(), id]
+    );
+  }
 }
 
 export async function performanceStats() {
