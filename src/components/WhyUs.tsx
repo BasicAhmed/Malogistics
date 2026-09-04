@@ -1,4 +1,4 @@
-import { UserCheck, MapPinned, Radar, Clock } from "lucide-react";
+import { UserCheck, MapPinned, Wallet, Zap } from "lucide-react";
 import Reveal from "./Reveal";
 
 const points = [
@@ -13,14 +13,14 @@ const points = [
     body: "Beit Bridge, Kazungula, Kopfontein, Lebombo — our dispatchers know each border post's rhythm, not just its name.",
   },
   {
-    icon: Radar,
-    title: "Tracked handovers",
-    body: "Every load is tracked from yard to dock. Every handoff is logged, not assumed.",
+    icon: Wallet,
+    title: "Competitive, transparent pricing",
+    body: "Because we shop your shipment across carrier partners instead of running our own fixed fleet, you get market rate — not markup.",
   },
   {
-    icon: Clock,
-    title: "Transparent transit times",
-    body: "We publish realistic corridor times up front, so a quote comes with an honest arrival window.",
+    icon: Zap,
+    title: "Fast quotes, faster support",
+    body: "Most quotes go out within hours, not days. And when you need someone, you get a dispatcher on the phone — not a queue.",
   },
 ];
 

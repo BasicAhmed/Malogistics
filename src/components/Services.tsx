@@ -8,7 +8,7 @@ const services = [
   {
     icon: Truck,
     title: "Road Freight (FTL & LTL)",
-    desc: "Full truckload and groupage across South Africa and the SADC corridor, with route plans built around customs windows.",
+    desc: "Full truckload and groupage arranged across South Africa and the SADC corridor, with route plans built around customs windows.",
   },
   {
     icon: ShieldCheck,

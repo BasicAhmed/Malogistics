@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getOrderById, updateOrderStatus } from "@/lib/store";
-import { sendTrackingEmail } from "@/lib/email";
+import { sendTrackingEmail, sendInTransitEmail, sendDeliveredEmail, sendCancelledEmail } from "@/lib/email";
 import { OrderStatus } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -19,16 +19,23 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
   }
 
-  const wasConfirmedBefore =
-    existing.status === "confirmed" ||
-    existing.status === "in_transit" ||
-    existing.status === "delivered";
+  // Only email when the status is genuinely changing to something new —
+  // avoids re-sending if an order is nudged back to a status it already had.
+  const statusChanged = existing.status !== status;
 
   const updated = await updateOrderStatus(params.id, status, { quoteAmount, corridor, onTime });
 
   let emailResult = null;
-  if (status === "confirmed" && !wasConfirmedBefore && updated) {
-    emailResult = await sendTrackingEmail(updated);
+  if (updated && statusChanged) {
+    if (status === "confirmed") {
+      emailResult = await sendTrackingEmail(updated);
+    } else if (status === "in_transit") {
+      emailResult = await sendInTransitEmail(updated);
+    } else if (status === "delivered") {
+      emailResult = await sendDeliveredEmail(updated);
+    } else if (status === "cancelled") {
+      emailResult = await sendCancelledEmail(updated);
+    }
   }
 
   return NextResponse.json({ order: updated, emailResult });

@@ -2,12 +2,17 @@
 
 import { useState } from "react";
 import LocationInput from "./LocationInput";
+import PackageVisual from "./PackageVisual";
 
 type FormData = {
   goodsType: string;
   origin: string;
   destination: string;
-  details: string;
+  weightKg: string;
+  lengthCm: string;
+  widthCm: string;
+  heightCm: string;
+  packageConfirmed: boolean;
   timeline: string;
   name: string;
   company: string;
@@ -19,7 +24,11 @@ const initialData: FormData = {
   goodsType: "",
   origin: "",
   destination: "",
-  details: "",
+  weightKg: "",
+  lengthCm: "",
+  widthCm: "",
+  heightCm: "",
+  packageConfirmed: false,
   timeline: "",
   name: "",
   company: "",
@@ -27,11 +36,19 @@ const initialData: FormData = {
   email: "",
 };
 
+const PRESETS: Record<string, { l: string; w: string; h: string }> = {
+  "Small box": { l: "30", w: "30", h: "30" },
+  "Medium box": { l: "50", w: "50", h: "50" },
+  "Large box": { l: "80", w: "60", h: "60" },
+};
+
+const LIMITS = { maxWeightKg: 40000, maxDimCm: 1200 };
+
 const steps = [
   "What are you shipping?",
   "Where is it coming from?",
   "Where is it going?",
-  "Shipment details",
+  "Package details",
   "When does it need to move?",
   "Your details",
 ];
@@ -44,25 +61,58 @@ export default function EnquiryForm() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const update = (field: keyof FormData, value: string) =>
+  const update = <K extends keyof FormData>(field: K, value: FormData[K]) =>
     setData((d) => ({ ...d, [field]: value }));
 
   const next = () => setStep((s) => Math.min(s + 1, steps.length - 1));
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
+  // Package validation
+  const weight = Number(data.weightKg);
+  const length = Number(data.lengthCm);
+  const width = Number(data.widthCm);
+  const height = Number(data.heightCm);
+
+  const weightError =
+    data.weightKg === ""
+      ? "Please enter the package weight."
+      : !Number.isFinite(weight) || weight <= 0
+      ? "Please enter a valid weight greater than 0 kg."
+      : weight > LIMITS.maxWeightKg
+      ? `That's a lot — please confirm (max ${LIMITS.maxWeightKg.toLocaleString()} kg).`
+      : "";
+
+  const dimsProvided = data.lengthCm || data.widthCm || data.heightCm;
+  const dimsError = !dimsProvided
+    ? ""
+    : [length, width, height].some((d) => !Number.isFinite(d) || d <= 0)
+    ? "Length, width, and height must all be valid numbers greater than 0."
+    : [length, width, height].some((d) => d > LIMITS.maxDimCm)
+    ? `That dimension seems too large (max ${LIMITS.maxDimCm}cm).`
+    : "";
+
+  const packageValid = !weightError && !dimsError && !!dimsProvided && data.packageConfirmed;
+
+  const volumeM3 = dimsProvided && !dimsError ? (length * width * height) / 1_000_000 : 0;
+
   const canSubmit = data.name && data.phone && data.email;
   const canContinue =
-    (step === 1 ? !!data.origin : true) && (step === 2 ? !!data.destination : true);
+    (step === 1 ? !!data.origin : true) &&
+    (step === 2 ? !!data.destination : true) &&
+    (step === 3 ? packageValid : true);
 
   async function handleSubmit() {
     if (!canSubmit) return;
     setSubmitting(true);
     setError("");
     try {
+      const details = `Weight: ${data.weightKg}kg · Dimensions: ${data.lengthCm}×${data.widthCm}×${data.heightCm}cm (${volumeM3.toFixed(
+        2
+      )} m³)`;
       const res = await fetch("/api/enquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, details }),
       });
       if (!res.ok) throw new Error("Failed to submit");
       const json = await res.json();
@@ -154,13 +204,102 @@ export default function EnquiryForm() {
       )}
 
       {step === 3 && (
-        <textarea
-          value={data.details}
-          onChange={(e) => update("details", e.target.value)}
-          placeholder="Approximate size, weight, quantity, or anything else we should know"
-          rows={4}
-          className="w-full bg-deck-maroon rounded p-4 text-paper placeholder:text-fog outline-none"
-        />
+        <div>
+          <label className="text-xs font-mono text-fog">Weight (kg)</label>
+          <input
+            type="number"
+            inputMode="decimal"
+            value={data.weightKg}
+            onChange={(e) => update("weightKg", e.target.value)}
+            placeholder="e.g. 250"
+            className="w-full bg-deck-maroon rounded p-3 mt-1 mb-1 text-paper placeholder:text-fog outline-none"
+          />
+          {weightError && data.weightKg !== "" && (
+            <p className="text-xs text-status-hold mb-3">{weightError}</p>
+          )}
+
+          <label className="text-xs font-mono text-fog mt-3 block mb-2">Package size</label>
+          <div className="grid grid-cols-4 gap-2 mb-3">
+            {Object.entries(PRESETS).map(([name, dims]) => (
+              <button
+                key={name}
+                type="button"
+                onClick={() => {
+                  update("lengthCm", dims.l);
+                  update("widthCm", dims.w);
+                  update("heightCm", dims.h);
+                }}
+                className={`text-xs p-2.5 rounded border ${
+                  data.lengthCm === dims.l && data.widthCm === dims.w && data.heightCm === dims.h
+                    ? "border-signal-amber bg-deck-maroon"
+                    : "border-fog/40"
+                }`}
+              >
+                {name}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => {
+                update("lengthCm", "");
+                update("widthCm", "");
+                update("heightCm", "");
+              }}
+              className="text-xs p-2.5 rounded border border-fog/40"
+            >
+              Custom
+            </button>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2">
+            <input
+              type="number"
+              inputMode="decimal"
+              value={data.lengthCm}
+              onChange={(e) => update("lengthCm", e.target.value)}
+              placeholder="L (cm)"
+              className="bg-deck-maroon rounded p-3 text-paper placeholder:text-fog outline-none text-sm"
+            />
+            <input
+              type="number"
+              inputMode="decimal"
+              value={data.widthCm}
+              onChange={(e) => update("widthCm", e.target.value)}
+              placeholder="W (cm)"
+              className="bg-deck-maroon rounded p-3 text-paper placeholder:text-fog outline-none text-sm"
+            />
+            <input
+              type="number"
+              inputMode="decimal"
+              value={data.heightCm}
+              onChange={(e) => update("heightCm", e.target.value)}
+              placeholder="H (cm)"
+              className="bg-deck-maroon rounded p-3 text-paper placeholder:text-fog outline-none text-sm"
+            />
+          </div>
+          {dimsError && <p className="text-xs text-status-hold mt-2">{dimsError}</p>}
+
+          {dimsProvided && !dimsError && (
+            <>
+              <PackageVisual lengthCm={length} widthCm={width} heightCm={height} />
+              <p className="text-center text-xs font-mono text-fog -mt-2 mb-3">
+                ≈ {volumeM3.toFixed(2)} m³
+              </p>
+              <label className="flex items-start gap-2 text-xs text-fog">
+                <input
+                  type="checkbox"
+                  checked={data.packageConfirmed}
+                  onChange={(e) => update("packageConfirmed", e.target.checked)}
+                  className="mt-0.5"
+                />
+                <span>
+                  I confirm these package details are accurate. (The image above is a visual
+                  guide based on what I entered, not an exact rendering.)
+                </span>
+              </label>
+            </>
+          )}
+        </div>
       )}
 
       {step === 4 && (
@@ -218,6 +357,7 @@ export default function EnquiryForm() {
         <p className="text-xs font-mono text-fog mt-6">
           {data.origin || "Origin"} → {data.destination || "Destination"}
           {data.goodsType ? ` · ${data.goodsType}` : ""}
+          {data.weightKg ? ` · ${data.weightKg}kg` : ""}
         </p>
       )}
 

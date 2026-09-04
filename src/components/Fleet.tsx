@@ -5,32 +5,22 @@ import Reveal from "./Reveal";
 import TruckRig from "./illustrations/TruckRig";
 import Bakkie from "./illustrations/Bakkie";
 
-const fleet = [
-  {
-    Icon: TruckRig,
-    name: "Full Truckload (FTL)",
-    note: "Dedicated rigs for containerised and bulk freight on the long-haul corridors.",
-    wide: true,
-  },
-  {
-    Icon: Bakkie,
-    name: "Last-Mile & Local",
-    note: "Bakkies and light vehicles for final-mile delivery and urban pickups.",
-    wide: false,
-  },
-];
-
 export default function Fleet() {
   return (
     <section className="px-6 md:px-10 py-24 bg-paper overflow-hidden">
       <div className="max-w-7xl mx-auto">
       <Reveal>
         <p className="uppercase tracking-widest text-signal-amber text-xs font-mono mb-3">
-          The fleet
+          How it moves
         </p>
-        <h2 className="font-display font-bold text-3xl md:text-4xl text-cargo-maroon mb-12 max-w-xl">
-          Built for the road, not the brochure.
+        <h2 className="font-display font-bold text-3xl md:text-4xl text-cargo-maroon mb-4 max-w-xl">
+          We don't own the trucks. We own the outcome.
         </h2>
+        <p className="text-steel max-w-xl mb-12">
+          As a freight forwarder, we match every shipment to a vetted carrier
+          partner for the right vehicle, corridor, and rate — so you get the
+          best option on the market, not whatever's sitting in a yard.
+        </p>
       </Reveal>
 
       <div className="grid md:grid-cols-3 gap-6">
@@ -42,8 +32,9 @@ export default function Fleet() {
                 Full Truckload &amp; Groupage
               </h3>
               <p className="text-fog text-sm max-w-sm">
-                Dedicated rigs for containerised and bulk freight, running the
-                Beit Bridge, Kazungula, Kopfontein and Lebombo corridors.
+                Carrier partners running the Beit Bridge, Kazungula, Kopfontein
+                and Lebombo corridors — booked against live rates, not a fixed
+                price list.
               </p>
             </div>
             <motion.div
@@ -66,8 +57,8 @@ export default function Fleet() {
                 Local &amp; Final-Mile
               </h3>
               <p className="text-fog text-sm">
-                Bakkies and light vehicles for urban pickups and final
-                delivery to your door.
+                Local courier and light-vehicle partners for urban pickups and
+                door-to-door delivery within a city.
               </p>
             </div>
             <motion.div
@@ -84,8 +75,7 @@ export default function Fleet() {
       </div>
 
       <p className="text-xs text-steel font-mono mt-6">
-        Fleet illustrations shown in brand style — real fleet photography can
-        replace these once supplied.
+        Illustrations shown in brand style, representing vehicle types arranged through our carrier network.
       </p>
       </div>
     </section>

@@ -1,14 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { ChevronDown } from "lucide-react";
 import AnimatedCounter from "./AnimatedCounter";
 import RouteLines from "./patterns/RouteLines";
 
 const corridors = [
-  { route: "WDH ↔ JNB", distance: "1,720 KM", time: "26H" },
-  { route: "GBE ↔ MPM", distance: "1,140 KM", time: "18H" },
-  { route: "JNB ↔ DUR", distance: "580 KM", time: "8H" },
-  { route: "WDH ↔ CPT", distance: "1,490 KM", time: "22H" },
+  { route: "JHB ↔ DUR", distance: "580 KM", time: "8H" },
+  { route: "JHB ↔ CPT", distance: "1,400 KM", time: "22H" },
+  { route: "JHB ↔ GBE", distance: "360 KM", time: "6H" },
+  { route: "JHB ↔ HRE", distance: "1,130 KM", time: "18H" },
 ];
 
 export default function Hero() {
@@ -23,20 +24,21 @@ export default function Hero() {
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         >
           <p className="uppercase tracking-widest text-signal-amber text-xs font-mono mb-4">
-            Container transport · Southern Africa
+            Freight Forwarding · Southern Africa
           </p>
           <h1 className="font-display font-extrabold text-4xl md:text-6xl lg:text-7xl leading-[0.95] tracking-tightest mb-6">
-            Move cargo
+            We arrange it.
             <br />
-            without
+            You forget
             <br />
             the hassle<span className="text-signal-amber">.</span>
           </h1>
           <p className="max-w-md text-fog mb-8">
-            118 trucks. Four corridors. Real-time handover tracking from yard
-            to dock — and a dispatcher you can call by name.
+            We don't own trucks — we own the outcome. Every shipment gets matched
+            to the right carrier, the best rate on the corridor, and a
+            dispatcher who actually answers.
           </p>
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-4 mb-10">
             <a
               href="#enquiry"
               className="bg-signal-amber text-cargo-maroon font-semibold px-6 py-3 rounded transition-transform hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20"
@@ -47,8 +49,19 @@ export default function Hero() {
               href="/track"
               className="border border-fog px-6 py-3 rounded hover:bg-deck-maroon transition-colors"
             >
-              Track a container
+              Track a shipment
             </a>
+          </div>
+
+          <div className="flex flex-wrap gap-x-8 gap-y-3">
+            {["Competitive, transparent rates", "Fast quote turnaround", "A dispatcher, not a call centre"].map(
+              (item) => (
+                <div key={item} className="flex items-center gap-2 text-sm text-fog">
+                  <span className="w-1.5 h-1.5 rounded-full bg-signal-amber" />
+                  {item}
+                </div>
+              )
+            )}
           </div>
         </motion.div>
 
@@ -69,9 +82,9 @@ export default function Hero() {
           <div className="grid grid-cols-2 gap-6">
             <div>
               <div className="text-3xl md:text-4xl font-display font-bold">
-                <AnimatedCounter target={87} />
+                <AnimatedCounter target={4} />
               </div>
-              <div className="text-xs text-fog font-mono mt-1">CONTAINERS IN MOTION</div>
+              <div className="text-xs text-fog font-mono mt-1">ACTIVE CORRIDORS</div>
             </div>
             <div>
               <div className="text-3xl md:text-4xl font-display font-bold">
@@ -82,9 +95,10 @@ export default function Hero() {
             </div>
             <div>
               <div className="text-3xl md:text-4xl font-display font-bold">
-                <AnimatedCounter target={4} />
+                <AnimatedCounter target={2} />
+                <span className="text-signal-amber">H</span>
               </div>
-              <div className="text-xs text-fog font-mono mt-1">ACTIVE CORRIDORS</div>
+              <div className="text-xs text-fog font-mono mt-1">AVG QUOTE RESPONSE</div>
             </div>
             <div>
               <div className="text-3xl md:text-4xl font-display font-bold">00</div>
@@ -103,6 +117,16 @@ export default function Hero() {
           ))}
         </div>
       </div>
+
+      {/* Scroll cue */}
+      <motion.div
+        className="relative flex flex-col items-center gap-1 pb-6 text-fog"
+        animate={{ y: [0, 6, 0] }}
+        transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <span className="text-[10px] font-mono uppercase tracking-widest">See how it works</span>
+        <ChevronDown size={18} />
+      </motion.div>
     </section>
   );
 }
