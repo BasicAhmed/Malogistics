@@ -8,8 +8,19 @@
   --paper: #f4f1ec;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: var(--paper);
   color: var(--cargo-maroon);
   font-family: "Inter", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--signal-amber);
+  color: var(--cargo-maroon);
 }

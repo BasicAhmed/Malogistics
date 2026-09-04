@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createOrder } from "@/lib/store";
+import { isKnownLocation } from "@/lib/locations";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -8,6 +9,13 @@ export async function POST(req: NextRequest) {
 
   if (!name || !phone || !email) {
     return NextResponse.json({ error: "Missing required contact details" }, { status: 400 });
+  }
+
+  if (origin && !isKnownLocation(origin)) {
+    return NextResponse.json({ error: "Origin isn't a recognized location." }, { status: 400 });
+  }
+  if (destination && !isKnownLocation(destination)) {
+    return NextResponse.json({ error: "Destination isn't a recognized location." }, { status: 400 });
   }
 
   const order = await createOrder({

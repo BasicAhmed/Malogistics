@@ -3,6 +3,7 @@ import { getOrderById, saveQuote, getPricingConfig } from "@/lib/store";
 import { sendQuotationEmail } from "@/lib/email";
 import { calculateQuote, validateQuoteInput, QuoteInput } from "@/lib/pricing";
 import { generateQuotePdf } from "@/lib/pdf";
+import { isKnownLocation } from "@/lib/locations";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +41,12 @@ export async function POST(req: NextRequest) {
       field: "destination",
       message: "Origin and destination are the same — use \"Local / in-city\" scope instead.",
     });
+  }
+  if (origin && !isKnownLocation(origin)) {
+    errors.push({ field: "origin", message: "Origin isn't a recognized location." });
+  }
+  if (destination && !isKnownLocation(destination)) {
+    errors.push({ field: "destination", message: "Destination isn't a recognized location." });
   }
   if (errors.length > 0) {
     return NextResponse.json({ error: "Validation failed", errors }, { status: 400 });

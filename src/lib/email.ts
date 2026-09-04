@@ -32,7 +32,7 @@ function wrapEmail(bodyHtml: string, preheader: string): string {
       <table role="presentation" width="560" style="max-width:560px;width:100%;">
         <tr><td style="padding:16px 32px;text-align:center;">
           <p style="font-family:monospace;font-size:11px;color:${BRAND.steel};margin:0;">
-            MA Logistics · Windhoek · Gaborone · Johannesburg · Maputo
+            MA Logistics · 5 Whitford Road, Germiston, Lambton
           </p>
         </td></tr>
       </table>

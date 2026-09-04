@@ -15,6 +15,7 @@ import {
 } from "@/lib/pricing";
 import { lookupDistance } from "@/lib/distances";
 import { formatCurrency, formatDateTime } from "@/lib/format";
+import LocationInput from "@/components/LocationInput";
 
 export default function QuotationsPage() {
   const [search, setSearch] = useState("");
@@ -133,7 +134,7 @@ export default function QuotationsPage() {
     loadPending();
   }
 
-  const canSend = !!selected && clientErrors.length === 0 && !sameCity;
+  const canSend = !!selected && clientErrors.length === 0 && !sameCity && !!origin && !!destination;
 
   return (
     <div>
@@ -224,19 +225,11 @@ export default function QuotationsPage() {
                 </div>
                 <div>
                   <label className="text-xs font-mono text-steel">Origin</label>
-                  <input
-                    value={origin}
-                    onChange={(e) => setOrigin(e.target.value)}
-                    className="w-full bg-fog/40 rounded p-2.5 mt-1 text-sm"
-                  />
+                  <LocationInput value={origin} onChange={setOrigin} />
                 </div>
                 <div>
                   <label className="text-xs font-mono text-steel">Destination</label>
-                  <input
-                    value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
-                    className="w-full bg-fog/40 rounded p-2.5 mt-1 text-sm"
-                  />
+                  <LocationInput value={destination} onChange={setDestination} />
                 </div>
                 {scope === "regional" && (
                   <div className="col-span-2">

@@ -32,10 +32,34 @@ const ROUTES: Record<string, number> = {
   "harare|durban": 1650,
   "cape town|durban": 1650,
   "durban|cape town": 1650,
+
+  // Germiston (company base) — East Rand, effectively same distances as Johannesburg
+  "germiston|durban": 570,
+  "durban|germiston": 570,
+  "germiston|cape town": 1400,
+  "cape town|germiston": 1400,
+  "germiston|gaborone": 320,
+  "gaborone|germiston": 320,
+  "germiston|maputo": 520,
+  "maputo|germiston": 520,
+  "germiston|harare": 1100,
+  "harare|germiston": 1100,
+  "germiston|lusaka": 1480,
+  "lusaka|germiston": 1480,
+  "germiston|windhoek": 1650,
+  "windhoek|germiston": 1650,
+  "germiston|bulawayo": 800,
+  "bulawayo|germiston": 800,
+  "germiston|pretoria": 40,
+  "pretoria|germiston": 40,
+  "germiston|johannesburg": 20,
+  "johannesburg|germiston": 20,
 };
 
 function normalize(place: string): string {
-  return place.trim().toLowerCase();
+  // Strip the ", Province/Country" suffix used by the location picker so
+  // "Johannesburg, Gauteng" still matches the "johannesburg" route keys.
+  return place.split(",")[0].trim().toLowerCase();
 }
 
 export function lookupDistance(origin: string, destination: string): number | null {

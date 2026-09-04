@@ -51,6 +51,7 @@ export default function Journey() {
       ref={ref}
       className="relative px-6 md:px-10 py-24 bg-cargo-maroon text-paper overflow-hidden"
     >
+      <div className="relative max-w-7xl mx-auto">
       <div className="max-w-3xl mb-16">
         <p className="uppercase tracking-widest text-signal-amber text-xs font-mono mb-3">
           How a shipment moves
@@ -97,6 +98,7 @@ export default function Journey() {
             </motion.div>
           ))}
         </div>
+      </div>
       </div>
     </section>
   );

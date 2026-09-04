@@ -23,6 +23,7 @@ const fleet = [
 export default function Fleet() {
   return (
     <section className="px-6 md:px-10 py-24 bg-paper overflow-hidden">
+      <div className="max-w-7xl mx-auto">
       <Reveal>
         <p className="uppercase tracking-widest text-signal-amber text-xs font-mono mb-3">
           The fleet
@@ -86,6 +87,7 @@ export default function Fleet() {
         Fleet illustrations shown in brand style — real fleet photography can
         replace these once supplied.
       </p>
+      </div>
     </section>
   );
 }

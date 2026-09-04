@@ -4,6 +4,7 @@ import AnimatedCounter from "./AnimatedCounter";
 export default function Proof() {
   return (
     <section className="px-6 md:px-10 py-24 bg-paper">
+      <div className="max-w-7xl mx-auto">
       <Reveal>
         <div className="grid md:grid-cols-3 gap-0 rounded-lg overflow-hidden border border-fog">
           <div className="bg-cargo-maroon text-paper p-8 flex flex-col justify-between min-h-[220px]">
@@ -44,6 +45,7 @@ export default function Proof() {
         Client testimonials, partner logos, and certifications displayed here
         once supplied — real credentials only.
       </p>
+      </div>
     </section>
   );
 }

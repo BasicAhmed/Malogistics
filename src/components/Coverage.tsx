@@ -15,7 +15,7 @@ export default function Coverage() {
   return (
     <section id="routes" className="relative px-6 md:px-10 py-24 bg-cargo-maroon text-paper overflow-hidden">
       <RouteLines className="absolute inset-0 w-full h-full text-fog opacity-20 pointer-events-none" />
-      <div className="relative">
+      <div className="relative max-w-7xl mx-auto">
         <Reveal>
           <p className="uppercase tracking-widest text-signal-amber text-xs font-mono mb-3">
             Geographic presence

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import LocationInput from "./LocationInput";
 
 type FormData = {
   goodsType: string;
@@ -50,6 +51,8 @@ export default function EnquiryForm() {
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
   const canSubmit = data.name && data.phone && data.email;
+  const canContinue =
+    (step === 1 ? !!data.origin : true) && (step === 2 ? !!data.destination : true);
 
   async function handleSubmit() {
     if (!canSubmit) return;
@@ -133,20 +136,20 @@ export default function EnquiryForm() {
       )}
 
       {step === 1 && (
-        <input
+        <LocationInput
           value={data.origin}
-          onChange={(e) => update("origin", e.target.value)}
-          placeholder="e.g. Durban, South Africa"
-          className="w-full bg-deck-maroon rounded p-4 text-paper placeholder:text-fog outline-none"
+          onChange={(v) => update("origin", v)}
+          placeholder="e.g. Germiston, Gauteng"
+          dark
         />
       )}
 
       {step === 2 && (
-        <input
+        <LocationInput
           value={data.destination}
-          onChange={(e) => update("destination", e.target.value)}
+          onChange={(v) => update("destination", v)}
           placeholder="e.g. Lusaka, Zambia"
-          className="w-full bg-deck-maroon rounded p-4 text-paper placeholder:text-fog outline-none"
+          dark
         />
       )}
 
@@ -229,7 +232,8 @@ export default function EnquiryForm() {
         {step < steps.length - 1 ? (
           <button
             onClick={next}
-            className="bg-signal-amber text-cargo-maroon font-semibold px-6 py-2.5 rounded text-sm"
+            disabled={!canContinue}
+            className="bg-signal-amber text-cargo-maroon font-semibold px-6 py-2.5 rounded text-sm disabled:opacity-40"
           >
             Continue →
           </button>

@@ -151,7 +151,7 @@ export async function generateQuotePdf(
             </View>
             <Text style={styles.quoteTitle}>QUOTATION</Text>
             <Text style={styles.headerAddress}>
-              Windhoek · Gaborone · Johannesburg · Maputo{"\n"}Container transport, Southern Africa
+              5 Whitford Road, Germiston, Lambton{"\n"}Container transport, Southern Africa
             </Text>
           </View>
           <View style={styles.metaBlock}>
@@ -226,7 +226,7 @@ export async function generateQuotePdf(
           </Text>
           <View>
             <Text style={styles.footerBrand}>MA Logistics</Text>
-            <Text style={styles.footerLine}>Windhoek · Gaborone · Johannesburg · Maputo</Text>
+            <Text style={styles.footerLine}>5 Whitford Road, Germiston, Lambton</Text>
             <Text style={styles.footerLine}>brand@malogistics.co</Text>
           </View>
         </View>

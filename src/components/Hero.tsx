@@ -16,7 +16,7 @@ export default function Hero() {
     <section className="relative bg-cargo-maroon text-paper overflow-hidden">
       <RouteLines className="absolute inset-0 w-full h-full text-fog opacity-40 pointer-events-none" />
 
-      <div className="relative px-6 md:px-10 pt-16 pb-14 grid md:grid-cols-2 gap-10 items-center">
+      <div className="relative max-w-7xl mx-auto px-6 md:px-10 pt-16 pb-14 lg:pt-24 lg:pb-20 grid md:grid-cols-2 gap-10 items-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -25,7 +25,7 @@ export default function Hero() {
           <p className="uppercase tracking-widest text-signal-amber text-xs font-mono mb-4">
             Container transport · Southern Africa
           </p>
-          <h1 className="font-display font-extrabold text-4xl md:text-6xl leading-[0.95] tracking-tightest mb-6">
+          <h1 className="font-display font-extrabold text-4xl md:text-6xl lg:text-7xl leading-[0.95] tracking-tightest mb-6">
             Move cargo
             <br />
             without
@@ -94,12 +94,14 @@ export default function Hero() {
         </motion.div>
       </div>
 
-      <div className="relative border-t border-deck-maroon px-6 md:px-10 py-5 flex flex-wrap gap-x-10 gap-y-2 text-xs font-mono text-fog">
-        {corridors.map((c) => (
-          <div key={c.route}>
-            {c.route} · {c.distance} · {c.time}
-          </div>
-        ))}
+      <div className="relative border-t border-deck-maroon">
+        <div className="max-w-7xl mx-auto px-6 md:px-10 py-5 flex flex-wrap gap-x-10 gap-y-2 text-xs font-mono text-fog">
+          {corridors.map((c) => (
+            <div key={c.route}>
+              {c.route} · {c.distance} · {c.time}
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

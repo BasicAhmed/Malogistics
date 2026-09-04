@@ -8,10 +8,11 @@ import Coverage from "@/components/Coverage";
 import Proof from "@/components/Proof";
 import EnquirySection from "@/components/EnquirySection";
 import Footer from "@/components/Footer";
+import MobileCTA from "@/components/MobileCTA";
 
 export default function Home() {
   return (
-    <main>
+    <main className="pb-16 md:pb-0">
       <Nav />
       <Hero />
       <Journey />
@@ -22,6 +23,7 @@ export default function Home() {
       <Proof />
       <EnquirySection />
       <Footer />
+      <MobileCTA />
     </main>
   );
 }
