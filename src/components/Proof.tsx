@@ -1,5 +1,4 @@
 import Reveal from "./Reveal";
-import AnimatedCounter from "./AnimatedCounter";
 
 export default function Proof() {
   return (
@@ -16,14 +15,13 @@ export default function Proof() {
             <p className="text-xs text-fog font-mono">@malogistics</p>
           </div>
           <div className="bg-fog/40 p-8 flex flex-col justify-between min-h-[220px]">
-            <p className="text-xs font-mono text-steel">APRIL · 2026</p>
+            <p className="text-xs font-mono text-steel">OUR COMMITMENT</p>
             <p className="font-display font-extrabold text-5xl text-cargo-maroon">
-              <AnimatedCounter target={99.2} decimals={1} />
-              <span className="text-signal-amber">%</span>
+              98<span className="text-signal-amber">%</span>
             </p>
             <div>
-              <p className="font-semibold text-cargo-maroon">On-time arrival across all corridors.</p>
-              <p className="text-xs text-steel font-mono mt-1">N=412 LOADS · 4 ROUTES</p>
+              <p className="font-semibold text-cargo-maroon">On-time arrival, or you hear why — same day.</p>
+              <p className="text-xs text-steel font-mono mt-1">TARGET, NOT YET MEASURED LIVE</p>
             </div>
           </div>
           <div className="bg-fog/40 p-8 flex flex-col justify-between min-h-[220px]">

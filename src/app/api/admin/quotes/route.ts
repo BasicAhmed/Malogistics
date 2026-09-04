@@ -4,6 +4,7 @@ import { sendQuotationEmail } from "@/lib/email";
 import { calculateQuote, validateQuoteInput, QuoteInput } from "@/lib/pricing";
 import { generateQuotePdf } from "@/lib/pdf";
 import { isKnownLocation } from "@/lib/locations";
+import { getAdminName } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +65,7 @@ export async function POST(req: NextRequest) {
     breakdown,
     inputs,
     followUpDays: 2,
+    by: getAdminName(),
   });
 
   if (!updated) {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createOrder } from "@/lib/store";
+import { createOrder, countRecentEnquiries } from "@/lib/store";
 import { isKnownLocation } from "@/lib/locations";
 
 export async function POST(req: NextRequest) {
@@ -16,6 +16,14 @@ export async function POST(req: NextRequest) {
   }
   if (destination && !isKnownLocation(destination)) {
     return NextResponse.json({ error: "Destination isn't a recognized location." }, { status: 400 });
+  }
+
+  const recentCount = await countRecentEnquiries(email, 10);
+  if (recentCount >= 3) {
+    return NextResponse.json(
+      { error: "You've submitted a few enquiries already — a dispatcher will be in touch shortly. Please wait before submitting again." },
+      { status: 429 }
+    );
   }
 
   const order = await createOrder({

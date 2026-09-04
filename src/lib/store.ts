@@ -134,13 +134,14 @@ export async function createOrder(
 export async function updateOrderStatus(
   id: string,
   status: OrderStatus,
-  extra?: Partial<Pick<Order, "quoteAmount" | "corridor" | "onTime">>
+  extra?: Partial<Pick<Order, "quoteAmount" | "corridor" | "onTime">>,
+  by?: string
 ): Promise<Order | undefined> {
   const existing = await getOrderById(id);
   if (!existing) return undefined;
 
   const now = new Date().toISOString();
-  const event: StatusEvent = { status, at: now };
+  const event: StatusEvent = { status, at: now, by };
   const history = [...existing.history, event];
 
   const { rows } = await pool.query(
@@ -174,6 +175,7 @@ export async function saveQuote(
     breakdown: Record<string, any>;
     inputs: Record<string, any>;
     followUpDays?: number;
+    by?: string;
   }
 ): Promise<Order | undefined> {
   const existing = await getOrderById(id);
@@ -181,7 +183,7 @@ export async function saveQuote(
 
   const now = new Date();
   const nextFollowUp = new Date(now.getTime() + (params.followUpDays ?? 2) * 86400000);
-  const history = [...existing.history, { status: "quoted" as const, at: now.toISOString() }];
+  const history = [...existing.history, { status: "quoted" as const, at: now.toISOString(), by: params.by }];
 
   const { rows } = await pool.query(
     `update orders set
@@ -292,6 +294,26 @@ export async function updatePricingConfig(config: PricingConfig): Promise<Pricin
     ]
   );
   return getPricingConfig();
+}
+
+export async function getOrdersByContact(contact: string): Promise<Order[]> {
+  const c = contact.trim().toLowerCase();
+  const { rows } = await pool.query(
+    `select * from orders where lower(email) = $1 or lower(phone) = $1 order by created_at desc limit 10`,
+    [c]
+  );
+  return rows.map(rowToOrder);
+}
+
+export async function countRecentEnquiries(email: string, minutes: number): Promise<number> {
+  const { rows } = await pool.query(
+    `select count(*) from orders
+     where lower(email) = lower($1)
+       and source = 'web_enquiry'
+       and created_at > now() - ($2 || ' minutes')::interval`,
+    [email, minutes]
+  );
+  return Number(rows[0].count);
 }
 
 export async function performanceStats() {

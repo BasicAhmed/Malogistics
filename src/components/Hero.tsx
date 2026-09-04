@@ -72,12 +72,8 @@ export default function Hero() {
           className="bg-deck-maroon rounded-lg p-6 md:p-8 relative"
         >
           <div className="flex items-center gap-2 text-xs font-mono text-fog mb-6">
-            <motion.span
-              className="w-2 h-2 rounded-full bg-status-clear inline-block"
-              animate={{ opacity: [1, 0.3, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
-            LIVE · TODAY
+            <span className="w-2 h-2 rounded-full bg-signal-amber inline-block" />
+            OUR COMMITMENT
           </div>
           <div className="grid grid-cols-2 gap-6">
             <div>
@@ -88,21 +84,18 @@ export default function Hero() {
             </div>
             <div>
               <div className="text-3xl md:text-4xl font-display font-bold">
-                <AnimatedCounter target={99.2} decimals={1} />
-                <span className="text-signal-amber">%</span>
-              </div>
-              <div className="text-xs text-fog font-mono mt-1">ON-TIME ARRIVAL · 30D</div>
-            </div>
-            <div>
-              <div className="text-3xl md:text-4xl font-display font-bold">
-                <AnimatedCounter target={2} />
+                &lt;<AnimatedCounter target={4} />
                 <span className="text-signal-amber">H</span>
               </div>
-              <div className="text-xs text-fog font-mono mt-1">AVG QUOTE RESPONSE</div>
+              <div className="text-xs text-fog font-mono mt-1">QUOTE TURNAROUND TARGET</div>
             </div>
             <div>
-              <div className="text-3xl md:text-4xl font-display font-bold">00</div>
-              <div className="text-xs text-fog font-mono mt-1">OPEN INCIDENTS</div>
+              <div className="text-3xl md:text-4xl font-display font-bold">1:1</div>
+              <div className="text-xs text-fog font-mono mt-1">A DISPATCHER YOU CAN CALL</div>
+            </div>
+            <div>
+              <div className="text-3xl md:text-4xl font-display font-bold">0</div>
+              <div className="text-xs text-fog font-mono mt-1">HIDDEN FEES ON A QUOTE</div>
             </div>
           </div>
         </motion.div>

@@ -48,6 +48,28 @@ export const KNOWN_LOCATIONS: string[] = [
   "Windhoek, Namibia",
 ];
 
+const SA_PROVINCES = [
+  "gauteng",
+  "kwazulu-natal",
+  "western cape",
+  "eastern cape",
+  "free state",
+  "limpopo",
+  "mpumalanga",
+  "northern cape",
+  "north west",
+];
+
+export function countryOf(location: string): string {
+  const suffix = location.split(",").pop()?.trim().toLowerCase() ?? "";
+  return SA_PROVINCES.includes(suffix) ? "South Africa" : suffix || "Unknown";
+}
+
+export function isCrossBorder(origin: string, destination: string): boolean {
+  if (!origin || !destination) return false;
+  return countryOf(origin) !== countryOf(destination);
+}
+
 function normalize(s: string): string {
   return s.trim().toLowerCase();
 }

@@ -1,10 +1,44 @@
 import type { Metadata } from "next";
 import "../styles/globals.css";
 
+const SITE_URL = "https://malogistics.vercel.app";
+const TITLE = "MA Logistics — Freight Forwarding, Southern Africa";
+const DESCRIPTION =
+  "Freight forwarding across South Africa and the SADC corridor. Competitive rates, real dispatchers, and shipment tracking from pickup to delivery.";
+
 export const metadata: Metadata = {
-  title: "MA Logistics — Delivered without hassle.",
-  description:
-    "Container transport across Southern Africa. Every load tracked, every minute accounted for, every handoff on time.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: TITLE,
+    template: "%s · MA Logistics",
+  },
+  description: DESCRIPTION,
+  keywords: [
+    "freight forwarding South Africa",
+    "logistics Germiston",
+    "cross border freight SADC",
+    "road freight Johannesburg",
+    "container transport Southern Africa",
+  ],
+  authors: [{ name: "MA Logistics" }],
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: SITE_URL,
+    siteName: "MA Logistics",
+    locale: "en_ZA",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

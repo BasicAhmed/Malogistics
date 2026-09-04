@@ -87,6 +87,7 @@ export default function OrderModal({
               {order.history.map((h, i) => (
                 <li key={i}>
                   {formatDateTime(h.at)} — {STATUS_LABELS[h.status]}
+                  {h.by ? ` (${h.by})` : ""}
                 </li>
               ))}
             </ul>

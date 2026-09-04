@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getOrderById, updateOrderStatus } from "@/lib/store";
 import { sendTrackingEmail, sendInTransitEmail, sendDeliveredEmail, sendCancelledEmail } from "@/lib/email";
 import { OrderStatus } from "@/lib/types";
+import { getAdminName } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -19,11 +20,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
   }
 
-  // Only email when the status is genuinely changing to something new —
-  // avoids re-sending if an order is nudged back to a status it already had.
   const statusChanged = existing.status !== status;
+  const adminName = getAdminName();
 
-  const updated = await updateOrderStatus(params.id, status, { quoteAmount, corridor, onTime });
+  const updated = await updateOrderStatus(params.id, status, { quoteAmount, corridor, onTime }, adminName);
 
   let emailResult = null;
   if (updated && statusChanged) {

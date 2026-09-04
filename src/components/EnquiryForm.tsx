@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import LocationInput from "./LocationInput";
 import PackageVisual from "./PackageVisual";
+import { calculateQuote, DEFAULT_PRICING_CONFIG, PricingConfig, GoodsCategory, QuoteUrgency, DeliveryScope } from "@/lib/pricing";
+import { lookupDistance } from "@/lib/distances";
+import { isCrossBorder } from "@/lib/locations";
+import { formatCurrency } from "@/lib/format";
 
 type FormData = {
   goodsType: string;
@@ -60,6 +64,14 @@ export default function EnquiryForm() {
   const [trackingNumber, setTrackingNumber] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [pricingConfig, setPricingConfig] = useState<PricingConfig>(DEFAULT_PRICING_CONFIG);
+
+  useEffect(() => {
+    fetch("/api/pricing-config")
+      .then((r) => r.json())
+      .then(setPricingConfig)
+      .catch(() => {});
+  }, []);
 
   const update = <K extends keyof FormData>(field: K, value: FormData[K]) =>
     setData((d) => ({ ...d, [field]: value }));
@@ -95,6 +107,46 @@ export default function EnquiryForm() {
 
   const volumeM3 = dimsProvided && !dimsError ? (length * width * height) / 1_000_000 : 0;
 
+  // Live estimate — only shown once we have enough to compute one honestly.
+  const sameCity = data.origin && data.destination && data.origin.trim().toLowerCase() === data.destination.trim().toLowerCase();
+  const scope: DeliveryScope = sameCity ? "local" : "regional";
+  const distanceKm = scope === "regional" ? lookupDistance(data.origin, data.destination) : 0;
+  const distanceKnown = scope === "local" || !!distanceKm;
+
+  const category: GoodsCategory =
+    data.goodsType === "Temperature-controlled"
+      ? "cold_chain"
+      : data.goodsType === "Containerised"
+      ? "containerized"
+      : "general";
+
+  const urgency: QuoteUrgency =
+    data.timeline === "This week"
+      ? "this_week"
+      : data.timeline === "Within 2 weeks"
+      ? "two_weeks"
+      : data.timeline === "This month"
+      ? "this_month"
+      : "flexible";
+
+  const estimateReady = !weightError && !dimsError && !!dimsProvided && !!data.origin && !!data.destination && distanceKnown;
+
+  const estimate = useMemo(() => {
+    if (!estimateReady) return null;
+    return calculateQuote(
+      {
+        category,
+        weightKg: weight,
+        volumeM3,
+        distanceKm: distanceKm || 0,
+        scope,
+        urgency,
+        crossBorder: isCrossBorder(data.origin, data.destination),
+      },
+      pricingConfig
+    );
+  }, [estimateReady, category, weight, volumeM3, distanceKm, scope, urgency, data.origin, data.destination, pricingConfig]);
+
   const canSubmit = data.name && data.phone && data.email;
   const canContinue =
     (step === 1 ? !!data.origin : true) &&
@@ -114,12 +166,15 @@ export default function EnquiryForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...data, details }),
       });
-      if (!res.ok) throw new Error("Failed to submit");
+      if (!res.ok) {
+        const json = await res.json().catch(() => null);
+        throw new Error(json?.error || "Failed to submit");
+      }
       const json = await res.json();
       setTrackingNumber(json.trackingNumber);
       setSubmitted(true);
-    } catch {
-      setError("Something went wrong — please try again or contact us directly.");
+    } catch (err: any) {
+      setError(err?.message || "Something went wrong — please try again or contact us directly.");
     } finally {
       setSubmitting(false);
     }
@@ -140,6 +195,11 @@ export default function EnquiryForm() {
           <p className="text-xs font-mono text-fog">YOUR REFERENCE NUMBER</p>
           <p className="font-mono text-xl text-signal-amber font-semibold">{trackingNumber}</p>
         </div>
+        {estimate && (
+          <p className="text-sm text-fog mt-4">
+            Estimated range: {formatCurrency(estimate.total * 0.9)} – {formatCurrency(estimate.total * 1.15)}
+          </p>
+        )}
         <p className="text-xs text-fog mt-4">
           A full tracking number will be sent to your email once the order is confirmed.
         </p>
@@ -350,6 +410,25 @@ export default function EnquiryForm() {
             className="w-full bg-deck-maroon rounded p-4 text-paper placeholder:text-fog outline-none"
           />
         </div>
+      )}
+
+      {/* Live estimate */}
+      {step >= 4 && estimate && (
+        <div className="bg-deck-maroon rounded-lg p-4 mt-6 border border-signal-amber/30">
+          <p className="text-xs font-mono text-signal-amber mb-1">ESTIMATED PRICE RANGE</p>
+          <p className="font-display font-bold text-2xl">
+            {formatCurrency(estimate.total * 0.9)} – {formatCurrency(estimate.total * 1.15)}
+          </p>
+          <p className="text-xs text-fog mt-1">
+            A ballpark based on what you've entered — your dispatcher confirms the exact quote.
+          </p>
+        </div>
+      )}
+      {step >= 4 && !estimate && data.origin && data.destination && !distanceKnown && (
+        <p className="text-xs text-fog mt-6">
+          We don't have a distance on file for this exact route yet — your dispatcher will price
+          it directly.
+        </p>
       )}
 
       {/* Running summary */}

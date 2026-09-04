@@ -2,6 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 
 const SESSION_COOKIE = "ma_admin_session";
 
+function getAdminUsers(): { name: string; password: string }[] {
+  const raw = process.env.ADMIN_USERS;
+  if (raw) {
+    return raw
+      .split(",")
+      .map((pair) => {
+        const [name, password] = pair.split(":").map((s) => s.trim());
+        return { name, password };
+      })
+      .filter((u) => u.name && u.password);
+  }
+  return [{ name: "Admin", password: process.env.ADMIN_PASSWORD || "malogistics-admin" }];
+}
+
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const isLoginPage = pathname === "/admin/login";
@@ -13,8 +27,8 @@ export function middleware(req: NextRequest) {
   if (!protectedPage && !protectedApi) return NextResponse.next();
 
   const cookieValue = req.cookies.get(SESSION_COOKIE)?.value;
-  const expected = process.env.ADMIN_PASSWORD || "malogistics-admin";
-  const authed = !!cookieValue && cookieValue === expected;
+  const [name, password] = (cookieValue || "").split("::");
+  const authed = getAdminUsers().some((u) => u.name === name && u.password === password);
 
   if (authed) return NextResponse.next();
 

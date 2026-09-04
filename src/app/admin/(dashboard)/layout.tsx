@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 const tabs = [
@@ -14,6 +15,14 @@ const tabs = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [adminName, setAdminName] = useState("");
+
+  useEffect(() => {
+    fetch("/api/admin/me")
+      .then((r) => r.json())
+      .then((d) => setAdminName(d.name))
+      .catch(() => {});
+  }, []);
 
   async function logout() {
     await fetch("/api/admin/logout", { method: "POST" });
@@ -29,9 +38,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <span className="text-signal-amber">/</span>
             <span>Admin</span>
           </div>
-          <button onClick={logout} className="text-sm text-fog hover:text-paper">
-            Log out
-          </button>
+          <div className="flex items-center gap-4">
+            {adminName && <span className="text-xs font-mono text-fog">Signed in as {adminName}</span>}
+            <button onClick={logout} className="text-sm text-fog hover:text-paper">
+              Log out
+            </button>
+          </div>
         </div>
         <nav className="flex gap-1 -mb-px overflow-x-auto">
           {tabs.map((t) => {

@@ -14,10 +14,24 @@ type TrackResult = {
   history?: { label: string; at: string }[];
 };
 
+type LookupResult = {
+  trackingNumber: string;
+  statusLabel: string;
+  origin: string;
+  destination: string;
+  createdAt: string;
+};
+
 export default function TrackPage() {
   const [ref, setRef] = useState("");
   const [result, setResult] = useState<TrackResult | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const [showLookup, setShowLookup] = useState(false);
+  const [contact, setContact] = useState("");
+  const [lookupResults, setLookupResults] = useState<LookupResult[] | null>(null);
+  const [lookupError, setLookupError] = useState("");
+  const [lookupLoading, setLookupLoading] = useState(false);
 
   async function checkStatus() {
     if (!ref.trim()) return;
@@ -31,6 +45,32 @@ export default function TrackPage() {
       }
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function lookupByContact() {
+    if (!contact.trim()) return;
+    setLookupLoading(true);
+    setLookupError("");
+    setLookupResults(null);
+    try {
+      const res = await fetch("/api/track/lookup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contact }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setLookupError(json.error || "Something went wrong.");
+        return;
+      }
+      if (json.results.length === 0) {
+        setLookupError("No shipments found for that email or phone number.");
+      } else {
+        setLookupResults(json.results);
+      }
+    } finally {
+      setLookupLoading(false);
     }
   }
 
@@ -49,7 +89,7 @@ export default function TrackPage() {
             Use the tracking number from your enquiry or confirmation email.
           </p>
 
-          <div className="flex gap-3 mb-6">
+          <div className="flex gap-3 mb-3">
             <input
               value={ref}
               onChange={(e) => setRef(e.target.value)}
@@ -65,6 +105,55 @@ export default function TrackPage() {
               {loading ? "…" : "Check"}
             </button>
           </div>
+
+          <button
+            onClick={() => setShowLookup((v) => !v)}
+            className="text-xs text-fog underline mb-6"
+          >
+            {showLookup ? "Hide" : "Lost your tracking number? Look it up by email or phone"}
+          </button>
+
+          {showLookup && (
+            <div className="bg-deck-maroon rounded-lg p-5 mb-6">
+              <div className="flex gap-3">
+                <input
+                  value={contact}
+                  onChange={(e) => setContact(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && lookupByContact()}
+                  placeholder="Email or phone number used"
+                  className="flex-1 bg-cargo-maroon rounded p-3 text-sm text-paper placeholder:text-fog outline-none"
+                />
+                <button
+                  onClick={lookupByContact}
+                  disabled={lookupLoading}
+                  className="bg-signal-amber text-cargo-maroon font-semibold px-4 rounded text-sm disabled:opacity-50"
+                >
+                  {lookupLoading ? "…" : "Find"}
+                </button>
+              </div>
+              {lookupError && <p className="text-xs text-status-hold mt-3">{lookupError}</p>}
+              {lookupResults && (
+                <ul className="mt-4 space-y-2">
+                  {lookupResults.map((r) => (
+                    <li key={r.trackingNumber}>
+                      <button
+                        onClick={() => {
+                          setRef(r.trackingNumber);
+                          setShowLookup(false);
+                          setResult(null);
+                          checkStatus();
+                        }}
+                        className="w-full text-left bg-cargo-maroon rounded p-3 text-sm hover:bg-cargo-maroon/70"
+                      >
+                        <span className="font-mono text-signal-amber">{r.trackingNumber}</span>
+                        <span className="text-fog"> · {r.statusLabel} · {r.origin} → {r.destination}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
 
           {result && result.found && (
             <div className="bg-deck-maroon rounded-lg p-6">

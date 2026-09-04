@@ -12,6 +12,7 @@ export interface StatusEvent {
   status: OrderStatus;
   at: string; // ISO timestamp
   note?: string;
+  by?: string; // admin name who made the change, when applicable
 }
 
 export interface Order {

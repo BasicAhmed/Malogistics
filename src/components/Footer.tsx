@@ -1,3 +1,4 @@
+import Link from "next/link";
 import ManifestCodes from "./patterns/ManifestCodes";
 
 export default function Footer() {
@@ -11,12 +12,16 @@ export default function Footer() {
             <span className="text-signal-amber">/</span>
             <span>MA Logistics</span>
           </div>
-          <p className="text-xs font-mono">Delivered without hassle.</p>
+          <p className="text-xs font-mono">We arrange it. You forget the hassle.</p>
         </div>
         <div className="text-xs font-mono flex flex-col gap-1">
           <span>5 WHITFORD ROAD, GERMISTON, LAMBTON</span>
           <span>brand@malogistics.co</span>
         </div>
+      </div>
+      <div className="flex gap-6 mt-6 text-xs font-mono">
+        <Link href="/privacy" className="hover:text-paper">Privacy Policy</Link>
+        <Link href="/terms" className="hover:text-paper">Terms &amp; Conditions</Link>
       </div>
       <ManifestCodes className="text-fog/50 mt-8" />
       </div>
