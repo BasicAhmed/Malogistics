@@ -6,6 +6,8 @@ const SITE_URL = "https://malogisticsza.com";
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: SITE_URL, changeFrequency: "weekly", priority: 1 },
+    { url: `${SITE_URL}/about`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${SITE_URL}/routes`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${SITE_URL}/track`, changeFrequency: "monthly", priority: 0.5 },
     ...CORRIDORS.map((c) => ({
       url: `${SITE_URL}/routes/${c.slug}`,

@@ -19,7 +19,10 @@ export default function Footer() {
           <span>brand@malogisticsza.com</span>
         </div>
       </div>
-      <div className="flex gap-6 mt-6 text-xs font-mono">
+      <div className="flex gap-6 mt-6 text-xs font-mono flex-wrap">
+        <Link href="/about" className="hover:text-paper">About</Link>
+        <Link href="/routes" className="hover:text-paper">Routes</Link>
+        <Link href="/track" className="hover:text-paper">Track</Link>
         <Link href="/privacy" className="hover:text-paper">Privacy Policy</Link>
         <Link href="/terms" className="hover:text-paper">Terms &amp; Conditions</Link>
       </div>

@@ -6,6 +6,7 @@ import Services from "@/components/Services";
 import WhyUs from "@/components/WhyUs";
 import Coverage from "@/components/Coverage";
 import Proof from "@/components/Proof";
+import FAQ from "@/components/FAQ";
 import EnquirySection from "@/components/EnquirySection";
 import Footer from "@/components/Footer";
 import MobileCTA from "@/components/MobileCTA";
@@ -42,6 +43,7 @@ export default function Home() {
       <WhyUs />
       <Coverage />
       <Proof />
+      <FAQ />
       <EnquirySection />
       <Footer />
       <MobileCTA />

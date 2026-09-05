@@ -17,7 +17,7 @@ export default function Nav() {
 
   const links = [
     { href: "#services", label: "Services" },
-    { href: "#routes", label: "Routes" },
+    { href: "/routes", label: "Routes" },
     { href: "/track", label: "Track" },
     { href: "#about", label: "About" },
   ];
