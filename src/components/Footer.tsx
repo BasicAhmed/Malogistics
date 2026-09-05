@@ -16,7 +16,7 @@ export default function Footer() {
         </div>
         <div className="text-xs font-mono flex flex-col gap-1">
           <span>5 WHITFORD ROAD, GERMISTON, LAMBTON</span>
-          <span>brand@malogistics.co</span>
+          <span>brand@malogisticsza.com</span>
         </div>
       </div>
       <div className="flex gap-6 mt-6 text-xs font-mono">

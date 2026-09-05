@@ -25,7 +25,7 @@ export default function Home() {
       addressCountry: "ZA",
     },
     areaServed: ["South Africa", "Botswana", "Zimbabwe", "Zambia", "Mozambique"],
-    url: "https://malogistics.vercel.app",
+    url: "https://malogisticsza.com",
   };
 
   return (

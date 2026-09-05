@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "../styles/globals.css";
 
-const SITE_URL = "https://malogistics.vercel.app";
+const SITE_URL = "https://malogisticsza.com";
 const TITLE = "MA Logistics — Freight Forwarding, Southern Africa";
 const DESCRIPTION =
   "Freight forwarding across South Africa and the SADC corridor. Competitive rates, real dispatchers, and shipment tracking from pickup to delivery.";

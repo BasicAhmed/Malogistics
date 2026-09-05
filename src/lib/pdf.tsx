@@ -227,7 +227,7 @@ export async function generateQuotePdf(
           <View>
             <Text style={styles.footerBrand}>MA Logistics</Text>
             <Text style={styles.footerLine}>5 Whitford Road, Germiston, Lambton</Text>
-            <Text style={styles.footerLine}>brand@malogistics.co</Text>
+            <Text style={styles.footerLine}>brand@malogisticsza.com</Text>
           </View>
         </View>
       </Page>

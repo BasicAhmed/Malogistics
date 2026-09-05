@@ -1,7 +1,7 @@
 import { Order } from "./types";
 import { QuoteBreakdown } from "./pricing";
 
-const FROM = process.env.EMAIL_FROM || "MA Logistics <dispatch@malogistics.co>";
+const FROM = process.env.EMAIL_FROM || "MA Logistics <dispatch@malogisticsza.com>";
 const BRAND = {
   maroon: "#3C0008",
   deckMaroon: "#5A0010",
@@ -93,9 +93,9 @@ export async function sendTrackingEmail(order: Order) {
       </td></tr>
     </table>
     <p style="font-size:14px;color:${BRAND.steel};">Route: ${order.origin} → ${order.destination}<br/>Goods: ${order.goodsType}</p>
-    <p style="font-size:14px;line-height:1.6;">You can check on it any time at <a href="https://malogistics.vercel.app/track" style="color:${BRAND.maroon};">malogistics.vercel.app/track</a> — and we'll keep you posted as it moves, so you shouldn't need to.</p>
+    <p style="font-size:14px;line-height:1.6;">You can check on it any time at <a href="https://malogisticsza.com/track" style="color:${BRAND.maroon};">malogisticsza.com/track</a> — and we'll keep you posted as it moves, so you shouldn't need to.</p>
   `;
-  const text = `Hey ${order.name.split(" ")[0]},\n\nYour shipment is confirmed. Tracking number: ${order.trackingNumber}\nRoute: ${order.origin} → ${order.destination}\n\nTrack it any time at malogistics.vercel.app/track\n\n— MA Logistics`;
+  const text = `Hey ${order.name.split(" ")[0]},\n\nYour shipment is confirmed. Tracking number: ${order.trackingNumber}\nRoute: ${order.origin} → ${order.destination}\n\nTrack it any time at malogisticsza.com/track\n\n— MA Logistics`;
   return dispatch(order.email, subject, wrapEmail(body + signOff(), `Tracking number ${order.trackingNumber}`), text);
 }
 
@@ -106,9 +106,9 @@ export async function sendInTransitEmail(order: Order) {
     <p style="font-size:15px;">Hey ${order.name.split(" ")[0]},</p>
     <p style="font-size:15px;line-height:1.6;">Quick update — your shipment just left and is now on its way from ${order.origin} to ${order.destination}. Nothing you need to do, just wanted you in the loop.</p>
     <p style="font-size:14px;color:${BRAND.steel};">Reference: ${order.trackingNumber}</p>
-    <p style="font-size:14px;line-height:1.6;">You can follow along any time at <a href="https://malogistics.vercel.app/track" style="color:${BRAND.maroon};">malogistics.vercel.app/track</a>. We'll let you know the moment it lands.</p>
+    <p style="font-size:14px;line-height:1.6;">You can follow along any time at <a href="https://malogisticsza.com/track" style="color:${BRAND.maroon};">malogisticsza.com/track</a>. We'll let you know the moment it lands.</p>
   `;
-  const text = `Hey ${order.name.split(" ")[0]},\n\nYour shipment (${order.trackingNumber}) is on its way from ${order.origin} to ${order.destination}. Track it at malogistics.vercel.app/track\n\n— MA Logistics`;
+  const text = `Hey ${order.name.split(" ")[0]},\n\nYour shipment (${order.trackingNumber}) is on its way from ${order.origin} to ${order.destination}. Track it at malogisticsza.com/track\n\n— MA Logistics`;
   return dispatch(order.email, subject, wrapEmail(body + signOff(), "Your shipment is on the move"), text);
 }
 

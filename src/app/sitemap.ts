@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { CORRIDORS } from "@/lib/corridors";
 
-const SITE_URL = "https://malogistics.vercel.app";
+const SITE_URL = "https://malogisticsza.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

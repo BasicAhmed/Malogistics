@@ -72,7 +72,7 @@ export default function PrivacyPage() {
               <p>
                 MA Logistics, 5 Whitford Road, Germiston, Lambton.
                 <br />
-                Email: brand@malogistics.co
+                Email: brand@malogisticsza.com
               </p>
             </div>
           </div>
