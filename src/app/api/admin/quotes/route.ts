@@ -5,6 +5,8 @@ import { calculateQuote, validateQuoteInput, QuoteInput } from "@/lib/pricing";
 import { generateQuotePdf } from "@/lib/pdf";
 import { isKnownLocation } from "@/lib/locations";
 import { getAdminName } from "@/lib/auth";
+import { sendAdminNotification } from "@/lib/email";
+import { formatCurrency } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -83,6 +85,12 @@ export async function POST(req: NextRequest) {
   }
 
   const emailResult = await sendQuotationEmail(updated, breakdown, pdfBase64);
+
+  await sendAdminNotification(
+    "Quote sent to customer",
+    updated,
+    `${formatCurrency(breakdown.total)} — sent by ${getAdminName() ?? "Admin"}`
+  );
 
   return NextResponse.json({ order: updated, breakdown, emailResult, pdfAttached: !!pdfBase64, pdfError });
 }

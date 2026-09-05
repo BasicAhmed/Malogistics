@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createOrder, countRecentEnquiries } from "@/lib/store";
 import { isKnownLocation } from "@/lib/locations";
+import { sendAdminNotification } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -38,6 +39,8 @@ export async function POST(req: NextRequest) {
     phone,
     email,
   });
+
+  await sendAdminNotification("New enquiry received", order, details);
 
   return NextResponse.json({
     trackingNumber: order.trackingNumber,

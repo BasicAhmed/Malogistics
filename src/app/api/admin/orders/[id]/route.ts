@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getOrderById, updateOrderStatus } from "@/lib/store";
-import { sendTrackingEmail, sendInTransitEmail, sendDeliveredEmail, sendCancelledEmail } from "@/lib/email";
-import { OrderStatus } from "@/lib/types";
+import {
+  sendTrackingEmail,
+  sendInTransitEmail,
+  sendDeliveredEmail,
+  sendCancelledEmail,
+  sendAdminNotification,
+} from "@/lib/email";
+import { OrderStatus, STATUS_LABELS } from "@/lib/types";
 import { getAdminName } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -36,6 +42,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     } else if (status === "cancelled") {
       emailResult = await sendCancelledEmail(updated);
     }
+
+    await sendAdminNotification(
+      `Status changed to ${STATUS_LABELS[status]}`,
+      updated,
+      `Changed by ${adminName ?? "Admin"}`
+    );
   }
 
   return NextResponse.json({ order: updated, emailResult });

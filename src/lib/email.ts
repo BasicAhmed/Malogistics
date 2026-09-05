@@ -80,6 +80,48 @@ function signOff(name = "The MA Logistics team") {
   return `<p style="font-size:15px;margin-top:26px;">Speak soon,<br/>${name}<br/><span style="color:${BRAND.steel};font-size:13px;">MA Logistics — we arrange it, you forget the hassle.</span></p>`;
 }
 
+// ---- Internal ops notifications (not customer-facing) ----
+function getNotificationRecipients(): string[] {
+  const raw = process.env.ADMIN_NOTIFICATION_EMAIL;
+  if (!raw) return [];
+  return raw.split(",").map((s) => s.trim()).filter(Boolean);
+}
+
+export async function sendAdminNotification(
+  headline: string,
+  order: Order,
+  extraLine?: string
+) {
+  const recipients = getNotificationRecipients();
+  if (recipients.length === 0) {
+    console.log("[admin-notify:not-configured] Would notify about:", headline, order.trackingNumber);
+    return { sent: false, reason: "ADMIN_NOTIFICATION_EMAIL not set" };
+  }
+
+  const subject = `${headline} — ${order.trackingNumber}`;
+  const body = `
+    <p style="font-size:15px;font-weight:bold;">${headline}</p>
+    <table role="presentation" width="100%" style="background:${BRAND.fog}40;border-radius:6px;margin:16px 0;">
+      <tr><td style="padding:14px 18px;font-size:13px;color:${BRAND.maroon};">
+        <strong>Tracking:</strong> ${order.trackingNumber}<br/>
+        <strong>Customer:</strong> ${order.name}${order.company ? ` (${order.company})` : ""}<br/>
+        <strong>Contact:</strong> ${order.email} · ${order.phone}<br/>
+        <strong>Route:</strong> ${order.origin || "—"} → ${order.destination || "—"}<br/>
+        <strong>Goods:</strong> ${order.goodsType || "—"}<br/>
+        <strong>Source:</strong> ${order.source === "web_enquiry" ? "Web enquiry" : "Logged by sales"}
+        ${extraLine ? `<br/><strong>Note:</strong> ${extraLine}` : ""}
+      </td></tr>
+    </table>
+    <p style="font-size:14px;"><a href="https://malogisticsza.com/admin/orders" style="color:${BRAND.maroon};">Open in admin →</a></p>
+  `;
+  const text = `${headline}\n\nTracking: ${order.trackingNumber}\nCustomer: ${order.name}\nContact: ${order.email} / ${order.phone}\nRoute: ${order.origin} → ${order.destination}\n${extraLine ? `Note: ${extraLine}\n` : ""}\nOpen in admin: https://malogisticsza.com/admin/orders`;
+
+  const results = await Promise.all(
+    recipients.map((to) => dispatch(to, subject, wrapEmail(body, headline), text))
+  );
+  return { sent: results.every((r) => r.sent) };
+}
+
 // ---- Confirmed: tracking number ----
 export async function sendTrackingEmail(order: Order) {
   const subject = `You're all set — here's your tracking number 🚚`;
