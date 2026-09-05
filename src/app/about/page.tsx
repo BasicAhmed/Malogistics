@@ -18,7 +18,7 @@ export default function AboutPage() {
             About us
           </p>
           <h1 className="font-display font-bold text-3xl md:text-5xl mb-6">
-            We don't own trucks. We own the outcome.
+            The right carrier, matched to every shipment.
           </h1>
           <p className="text-fog text-lg leading-relaxed">
             MA Logistics is a freight forwarder based at 5 Whitford Road, Germiston, Lambton —
@@ -36,10 +36,10 @@ export default function AboutPage() {
               How we work
             </h2>
             <p>
-              As a freight forwarder, we don't operate our own fleet. Instead, we match every
-              shipment to a vetted carrier partner based on the route, vehicle type, and rate —
-              so you get the right option for your specific shipment rather than whatever a
-              single company happens to have available.
+              As a freight forwarder, we match every shipment to a vetted carrier
+              partner based on the route, vehicle type, and rate — so you get the
+              right option for your specific shipment, backed by a network built
+              for exactly that job.
             </p>
           </div>
 

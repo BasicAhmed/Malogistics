@@ -7,7 +7,7 @@ const FAQS = [
   },
   {
     q: "Do you own your own trucks?",
-    a: "No — we're a freight forwarder, not a carrier. We match every shipment to a vetted carrier partner for the right vehicle, corridor, and rate, so you get market pricing instead of whatever's parked in a single company's yard.",
+    a: "We're a freight forwarder, not a carrier — we match every shipment to a vetted carrier partner for the right vehicle, corridor, and rate, so you always get market pricing built around your specific job.",
   },
   {
     q: "What areas do you cover?",

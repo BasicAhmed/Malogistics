@@ -15,7 +15,7 @@ const points = [
   {
     icon: Wallet,
     title: "Competitive, transparent pricing",
-    body: "Because we shop your shipment across carrier partners instead of running our own fixed fleet, you get market rate — not markup.",
+    body: "We shop your shipment across multiple carrier partners for every quote, so you get market rate — not markup.",
   },
   {
     icon: Zap,

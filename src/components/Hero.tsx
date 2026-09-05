@@ -34,9 +34,8 @@ export default function Hero() {
             the hassle<span className="text-signal-amber">.</span>
           </h1>
           <p className="max-w-md text-fog mb-8">
-            We don't own trucks — we own the outcome. Every shipment gets matched
-            to the right carrier, the best rate on the corridor, and a
-            dispatcher who actually answers.
+            Every shipment gets matched to the right carrier for the job, the
+            best rate on the corridor, and a dispatcher who actually answers.
           </p>
           <div className="flex flex-wrap gap-4 mb-10">
             <a

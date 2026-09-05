@@ -14,12 +14,12 @@ export default function Fleet() {
           How it moves
         </p>
         <h2 className="font-display font-bold text-3xl md:text-4xl text-cargo-maroon mb-4 max-w-xl">
-          We don't own the trucks. We own the outcome.
+          The right carrier for every shipment.
         </h2>
         <p className="text-steel max-w-xl mb-12">
           As a freight forwarder, we match every shipment to a vetted carrier
-          partner for the right vehicle, corridor, and rate — so you get the
-          best option on the market, not whatever's sitting in a yard.
+          partner for the right vehicle, corridor, and rate — so you always get
+          the best option on the market for that specific job.
         </p>
       </Reveal>
 
