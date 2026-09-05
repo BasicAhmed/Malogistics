@@ -5,6 +5,7 @@ import { Order, OrderStatus, STATUS_LABELS, STATUS_ORDER } from "@/lib/types";
 import { formatDateTime } from "@/lib/format";
 import StatusBadge from "@/components/admin/StatusBadge";
 import OrderModal from "@/components/admin/OrderModal";
+import { Trash2 } from "lucide-react";
 
 const PAGE_SIZE = 25;
 
@@ -30,6 +31,8 @@ export default function OrdersPage() {
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Order | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
 
@@ -71,6 +74,41 @@ export default function OrdersPage() {
       body: JSON.stringify({ status: s }),
     });
     load();
+  }
+
+  async function deleteOne(id: string, trackingNumber: string) {
+    if (!confirm(`Delete order ${trackingNumber}? This can't be undone.`)) return;
+    await fetch(`/api/admin/orders/${id}`, { method: "DELETE" });
+    load();
+  }
+
+  async function deleteSelected() {
+    if (selectedIds.size === 0) return;
+    if (!confirm(`Delete ${selectedIds.size} order(s)? This can't be undone.`)) return;
+    setDeleting(true);
+    await Promise.all(
+      Array.from(selectedIds).map((id) => fetch(`/api/admin/orders/${id}`, { method: "DELETE" }))
+    );
+    setSelectedIds(new Set());
+    setDeleting(false);
+    load();
+  }
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    if (selectedIds.size === orders.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(orders.map((o) => o.id)));
+    }
   }
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -147,8 +185,18 @@ export default function OrdersPage() {
         </select>
       </div>
 
-      <p className="text-xs font-mono text-steel mb-3">
-        {total} order{total === 1 ? "" : "s"}
+      <p className="text-xs font-mono text-steel mb-3 flex items-center gap-4">
+        <span>{total} order{total === 1 ? "" : "s"}</span>
+        {selectedIds.size > 0 && (
+          <button
+            onClick={deleteSelected}
+            disabled={deleting}
+            className="flex items-center gap-1.5 text-status-hold font-semibold disabled:opacity-50"
+          >
+            <Trash2 size={14} />
+            {deleting ? "Deleting…" : `Delete selected (${selectedIds.size})`}
+          </button>
+        )}
       </p>
 
       {loading ? (
@@ -160,12 +208,20 @@ export default function OrdersPage() {
           <table className="w-full text-sm border-collapse">
             <thead>
               <tr className="text-left text-xs font-mono text-steel bg-fog/40">
+                <th className="py-2.5 px-4">
+                  <input
+                    type="checkbox"
+                    checked={orders.length > 0 && selectedIds.size === orders.length}
+                    onChange={toggleSelectAll}
+                  />
+                </th>
                 <th className="py-2.5 px-4">Tracking #</th>
                 <th className="py-2.5 px-4">Customer</th>
                 <th className="py-2.5 px-4">Route</th>
                 <th className="py-2.5 px-4">Source</th>
                 <th className="py-2.5 px-4">Status</th>
                 <th className="py-2.5 px-4">Submitted</th>
+                <th className="py-2.5 px-4"></th>
               </tr>
             </thead>
             <tbody>
@@ -175,6 +231,13 @@ export default function OrdersPage() {
                   className="border-t border-fog hover:bg-fog/20 cursor-pointer"
                   onClick={() => setSelected(o)}
                 >
+                  <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(o.id)}
+                      onChange={() => toggleSelect(o.id)}
+                    />
+                  </td>
                   <td className="py-3 px-4 font-mono">{o.trackingNumber}</td>
                   <td className="py-3 px-4">
                     {o.name}
@@ -201,6 +264,15 @@ export default function OrdersPage() {
                   </td>
                   <td className="py-3 px-4 text-xs font-mono text-steel whitespace-nowrap">
                     {formatDateTime(o.createdAt)}
+                  </td>
+                  <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => deleteOne(o.id, o.trackingNumber)}
+                      className="text-steel hover:text-status-hold"
+                      title="Delete order"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </td>
                 </tr>
               ))}

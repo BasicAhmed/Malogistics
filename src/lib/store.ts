@@ -316,6 +316,11 @@ export async function countRecentEnquiries(email: string, minutes: number): Prom
   return Number(rows[0].count);
 }
 
+export async function deleteOrder(id: string): Promise<boolean> {
+  const result = await pool.query("delete from orders where id = $1", [id]);
+  return true;
+}
+
 export async function performanceStats() {
   const { rows } = await pool.query("select * from orders");
   const orders = rows.map(rowToOrder);

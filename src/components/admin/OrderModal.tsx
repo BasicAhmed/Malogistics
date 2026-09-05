@@ -18,6 +18,7 @@ export default function OrderModal({
   const [quoteAmount, setQuoteAmount] = useState(order.quoteAmount?.toString() ?? "");
   const [corridor, setCorridor] = useState(order.corridor ?? "");
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   async function save() {
     setSaving(true);
@@ -31,6 +32,15 @@ export default function OrderModal({
       }),
     });
     setSaving(false);
+    onUpdated();
+    onClose();
+  }
+
+  async function remove() {
+    if (!confirm(`Delete order ${order.trackingNumber}? This can't be undone.`)) return;
+    setDeleting(true);
+    await fetch(`/api/admin/orders/${order.id}`, { method: "DELETE" });
+    setDeleting(false);
     onUpdated();
     onClose();
   }
@@ -136,17 +146,26 @@ export default function OrderModal({
             </div>
           </Section>
 
-          <div className="flex justify-end gap-3 pt-2">
-            <button onClick={onClose} className="text-sm text-steel px-4 py-2.5">
-              Cancel
-            </button>
+          <div className="flex justify-between items-center pt-2">
             <button
-              onClick={save}
-              disabled={saving}
-              className="bg-signal-amber text-cargo-maroon font-semibold px-6 py-2.5 rounded text-sm disabled:opacity-50"
+              onClick={remove}
+              disabled={deleting}
+              className="text-sm text-status-hold disabled:opacity-50"
             >
-              {saving ? "Saving…" : "Save changes"}
+              {deleting ? "Deleting…" : "Delete order"}
             </button>
+            <div className="flex gap-3">
+              <button onClick={onClose} className="text-sm text-steel px-4 py-2.5">
+                Cancel
+              </button>
+              <button
+                onClick={save}
+                disabled={saving}
+                className="bg-signal-amber text-cargo-maroon font-semibold px-6 py-2.5 rounded text-sm disabled:opacity-50"
+              >
+                {saving ? "Saving…" : "Save changes"}
+              </button>
+            </div>
           </div>
         </div>
       </div>

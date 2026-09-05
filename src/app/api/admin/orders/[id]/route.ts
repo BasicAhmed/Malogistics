@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getOrderById, updateOrderStatus } from "@/lib/store";
+import { getOrderById, updateOrderStatus, deleteOrder } from "@/lib/store";
 import {
   sendTrackingEmail,
   sendInTransitEmail,
@@ -51,4 +51,13 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 
   return NextResponse.json({ order: updated, emailResult });
+}
+
+export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+  const existing = await getOrderById(params.id);
+  if (!existing) {
+    return NextResponse.json({ error: "Order not found" }, { status: 404 });
+  }
+  await deleteOrder(params.id);
+  return NextResponse.json({ ok: true });
 }
