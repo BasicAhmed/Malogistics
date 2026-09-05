@@ -124,7 +124,7 @@ export async function sendAdminNotification(
 
 // ---- Confirmed: tracking number ----
 export async function sendTrackingEmail(order: Order) {
-  const subject = `You're all set — here's your tracking number 🚚`;
+  const subject = `You're confirmed — tracking number inside`;
   const body = `
     <p style="font-size:15px;">Hey ${order.name.split(" ")[0]},</p>
     <p style="font-size:15px;line-height:1.6;">Good news — your shipment is confirmed and locked in. Here's the number to keep handy:</p>
@@ -143,7 +143,7 @@ export async function sendTrackingEmail(order: Order) {
 
 // ---- In transit ----
 export async function sendInTransitEmail(order: Order) {
-  const subject = `It's moving! Your shipment is on its way`;
+  const subject = `Your shipment just left — here's where it's headed`;
   const body = `
     <p style="font-size:15px;">Hey ${order.name.split(" ")[0]},</p>
     <p style="font-size:15px;line-height:1.6;">Quick update — your shipment just left and is now on its way from ${order.origin} to ${order.destination}. Nothing you need to do, just wanted you in the loop.</p>
@@ -156,7 +156,7 @@ export async function sendInTransitEmail(order: Order) {
 
 // ---- Delivered ----
 export async function sendDeliveredEmail(order: Order) {
-  const subject = `Delivered! 🎉 ${order.trackingNumber}`;
+  const subject = `Delivered — thanks for shipping with us`;
   const body = `
     <p style="font-size:15px;">Hey ${order.name.split(" ")[0]},</p>
     <p style="font-size:15px;line-height:1.6;">Your shipment has arrived — ${order.origin} to ${order.destination}, done. Thanks for trusting us with it.</p>
@@ -169,7 +169,7 @@ export async function sendDeliveredEmail(order: Order) {
 
 // ---- Cancelled ----
 export async function sendCancelledEmail(order: Order) {
-  const subject = `Your shipment (${order.trackingNumber}) has been cancelled`;
+  const subject = `This shipment's been cancelled, as requested`;
   const body = `
     <p style="font-size:15px;">Hey ${order.name.split(" ")[0]},</p>
     <p style="font-size:15px;line-height:1.6;">Just confirming this shipment (${order.origin} → ${order.destination}, ref ${order.trackingNumber}) has been cancelled. No charges, no follow-up needed.</p>
@@ -181,7 +181,7 @@ export async function sendCancelledEmail(order: Order) {
 
 // ---- Quotation ----
 export async function sendQuotationEmail(order: Order, breakdown: QuoteBreakdown, pdfBase64?: string) {
-  const subject = `Here's your quote — ${order.origin} → ${order.destination}`;
+  const subject = `Your price for ${order.origin} → ${order.destination} is ready`;
 
   const lines: string[] = [];
   lines.push(moneyRow("Base price", breakdown.basePrice));
@@ -233,7 +233,7 @@ export async function sendQuotationEmail(order: Order, breakdown: QuoteBreakdown
 // ---- Follow-ups on an unconfirmed quote ----
 const FOLLOW_UP_COPY = [
   {
-    subject: (o: Order) => `Still thinking it over?`,
+    subject: (o: Order) => `Still deciding on your quote?`,
     body: (o: Order) => `
       <p style="font-size:15px;">Hey ${o.name.split(" ")[0]},</p>
       <p style="font-size:15px;line-height:1.6;">Just floating this back to the top of your inbox — your quote for ${o.origin} → ${o.destination} (ref ${o.trackingNumber}) is still open whenever you're ready.</p>
@@ -241,7 +241,7 @@ const FOLLOW_UP_COPY = [
     `,
   },
   {
-    subject: (o: Order) => `Last nudge on ${o.trackingNumber}, promise`,
+    subject: (o: Order) => `One last check-in on your quote`,
     body: (o: Order) => `
       <p style="font-size:15px;">Hey ${o.name.split(" ")[0]},</p>
       <p style="font-size:15px;line-height:1.6;">Last check-in on the quote for ${o.origin} → ${o.destination} (ref ${o.trackingNumber}) — we'll leave it with you from here. Everything's saved, so whenever the timing's right, just reply and we'll pick it straight back up. No expiry, no awkwardness.</p>
