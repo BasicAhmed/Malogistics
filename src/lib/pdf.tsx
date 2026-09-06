@@ -220,10 +220,15 @@ export async function generateQuotePdf(
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerNote}>
-            This quotation is valid for 7 days from the date above. Final pricing may be
-            adjusted if actual weight, volume, or route differs from what was declared.
-          </Text>
+          <View>
+            <Text style={styles.footerNote}>
+              This quotation is valid for 7 days from the date above. Final pricing may be
+              adjusted if actual weight, volume, or route differs from what was declared.
+            </Text>
+            <Text style={{ fontSize: 7, color: COLORS.maroon, opacity: 0.5, marginTop: 8 }}>
+              Site by Nino Techy
+            </Text>
+          </View>
           <View>
             <Text style={styles.footerBrand}>MA Logistics</Text>
             <Text style={styles.footerLine}>5 Whitford Road, Germiston, Lambton</Text>

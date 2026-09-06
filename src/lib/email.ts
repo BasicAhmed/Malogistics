@@ -34,6 +34,9 @@ function wrapEmail(bodyHtml: string, preheader: string): string {
           <p style="font-family:monospace;font-size:11px;color:${BRAND.steel};margin:0;">
             MA Logistics · 5 Whitford Road, Germiston, Lambton
           </p>
+          <p style="font-family:monospace;font-size:10px;color:${BRAND.steel};opacity:0.6;margin:6px 0 0;">
+            Site by Nino Techy
+          </p>
         </td></tr>
       </table>
     </td></tr>

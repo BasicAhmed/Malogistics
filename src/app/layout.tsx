@@ -21,6 +21,7 @@ export const metadata: Metadata = {
     "container transport Southern Africa",
   ],
   authors: [{ name: "MA Logistics" }],
+  generator: "Nino Techy",
   alternates: { canonical: "/" },
   openGraph: {
     title: TITLE,

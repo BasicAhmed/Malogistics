@@ -27,6 +27,17 @@ export default function Footer() {
         <Link href="/terms" className="hover:text-paper">Terms &amp; Conditions</Link>
       </div>
       <ManifestCodes className="text-fog/50 mt-8" />
+      <p className="text-[10px] font-mono text-fog/40 mt-6">
+        Site by{" "}
+        <a
+          href="https://ninotechy.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-fog"
+        >
+          Nino Techy
+        </a>
+      </p>
       </div>
     </footer>
   );

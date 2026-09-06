@@ -65,6 +65,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </nav>
       </header>
       <div className="px-6 md:px-10 py-8 max-w-7xl mx-auto">{children}</div>
+      <p className="text-center text-[10px] font-mono text-steel/60 pb-6">
+        Built by{" "}
+        <a href="https://ninotechy.com" target="_blank" rel="noopener noreferrer" className="hover:text-steel">
+          Nino Techy
+        </a>
+      </p>
     </div>
   );
 }
